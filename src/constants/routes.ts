@@ -11,6 +11,9 @@ export const ROUTES = {
   resetPassword: '/reset-password',
   dashboard: '/dashboard',
   customers: '/customers',
+  jobs: '/jobs',
+  materials: '/materials',
+  materialOrders: '/materials/orders',
   forbidden: '/forbidden',
   unauthorized: '/unauthorized',
 } as const;

@@ -1,10 +1,7 @@
 'use client';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { customerQuerySchema } from '@/features/customers/schemas/customerQuerySchema';
-import {
-  filterFixtureRows,
-  fixturePage,
-} from '@/features/customers/helpers/customerHelpers';
+import { fixtureQuerySchema } from '@/lib/table/fixtureQuerySchema';
+import { filterFixtureRows, fixturePage } from '@/lib/table/fixtureRows';
 
 // Local presentation state only. No API calls or server pagination claims.
 export function useFixtureTable<T>({
@@ -20,7 +17,7 @@ export function useFixtureTable<T>({
 }) {
   const params = useSearchParams();
   const pathname = usePathname();
-  const query = customerQuerySchema.parse({
+  const query = fixtureQuerySchema.parse({
     search: params.get('search') || '',
     status: params.get('status') || 'all',
     page: params.get('page') || '1',
