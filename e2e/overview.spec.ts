@@ -33,7 +33,7 @@ for (const viewport of viewports) {
     expect(
       await page.evaluate(() => document.documentElement.scrollHeight),
     ).toBe(viewport.height);
-    const main = page.getByRole('main', { name: 'Overview dashboard' });
+    const main = page.getByRole('main', { name: 'Administration workspace' });
     expect(
       await main.evaluate(
         (element) => element.scrollWidth <= element.clientWidth,

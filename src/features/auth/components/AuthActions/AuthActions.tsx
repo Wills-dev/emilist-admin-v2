@@ -22,7 +22,7 @@ export function AuthActions({
           <Button
             asChild
             variant="outline"
-            className="flex-1 border-emerald-500 text-xs text-emerald-700 hover:bg-emerald-50"
+            className="flex-1 border-emerald-500 text-xs text-emerald-700 transition-colors duration-200 ease-out hover:border-emerald-600 hover:bg-emerald-50 focus-visible:ring-emerald-600 motion-reduce:transition-none"
           >
             <Link href={backHref}>
               <ChevronLeft />
@@ -35,7 +35,7 @@ export function AuthActions({
             type="submit"
             disabled={disabled}
             aria-describedby="auth-unavailable"
-            className="flex-1 bg-[#109f52] text-xs text-white disabled:opacity-50"
+            className="flex-1 bg-[#109f52] text-xs text-white transition-colors duration-200 ease-out hover:bg-[#0e8f4a] focus-visible:ring-emerald-600 disabled:opacity-50 motion-reduce:transition-none"
           >
             {submitLabel}
             <ChevronRight />

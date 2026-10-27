@@ -22,7 +22,7 @@ import type { DashboardProfile } from '@/types/DashboardProfile';
 import { cn } from '@/lib/utils/cn';
 const primaryItems = [
   { label: 'Overview', icon: House, href: ROUTES.dashboard },
-  { label: 'Customers', icon: UsersRound },
+  { label: 'Customers', icon: UsersRound, href: ROUTES.customers },
   { label: 'Jobs', icon: NotebookText },
   { label: 'Materials', icon: HandCoins },
   { label: 'Payments', icon: Wallet },
@@ -38,6 +38,8 @@ const itemClass =
 export function DashboardSidebar({ profile }: { profile: DashboardProfile }) {
   const { open, setOpen } = useSidebarStore();
   const pathname = usePathname();
+  const isActive = (href: string) =>
+    pathname === href || pathname.startsWith(`${href}/`);
   const content = (
     <>
       <nav aria-label="Main navigation" className="space-y-3">
@@ -46,11 +48,11 @@ export function DashboardSidebar({ profile }: { profile: DashboardProfile }) {
             <Link
               key={label}
               href={item.href}
-              aria-current={pathname === item.href ? 'page' : undefined}
+              aria-current={isActive(item.href) ? 'page' : undefined}
               onClick={() => setOpen(false)}
               className={cn(
                 itemClass,
-                pathname === item.href
+                isActive(item.href)
                   ? 'bg-[#edfdf5] text-[#00a952]'
                   : 'bg-[#f8f9f8] text-[#343b36] hover:bg-emerald-50',
               )}

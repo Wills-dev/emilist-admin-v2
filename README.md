@@ -131,6 +131,18 @@ Routes are centralized in `src/constants/routes.ts`, including typed route value
 
 The responsive shell retains a fixed header and an independently scrolling content region, with a Radix navigation drawer on narrower screens. Charts load dynamically with local skeletons. Initial cards use 280ms opacity/transform entrances staggered by 50ms; charts animate once over 550–600ms. All entrance/drawer/chart motion is disabled for reduced-motion preferences. CSS keyframes in globals.css supply the scoped entrance and Radix mount/unmount animations that transition utilities alone cannot express.
 
+## Customer Management UI
+
+The development-only dashboard preview also includes Customer Management. `/customers` displays the list; `/customers/[customerId]` displays a selected customer's details. Profile sections use `/customers/[customerId]/services`, `/jobs`, `/listed-items`, `/orders`, `/sales`, `/transactions`, and `/subscriptions`. Use `CUSTOMER_ROUTES` from `src/constants/routes.ts` to build these paths from the selected ID. Unknown IDs and tabs return not-found states. All customer routes remain denied in production until server-validated authentication is connected.
+
+`src/features/customers` owns typed presentation fixtures, domain-specific table columns, URL-state schemas, fixture-filtering helpers, UI hooks, and customer components. The shared details route layout renders the profile, wallet, actions, and navigation once across all eight sections. Shared `DataTable`, `Pagination`, `DetailField`, and `StatusBadge` components provide reusable interface structure without coupling table rows to a domain.
+
+Search, status filters, and pagination operate on local sample records and persist in URL parameters. Twelve customer fixtures support two pages; the displayed 165,162 total is a design fixture, not a loaded dataset. Additional customer/job records are explicitly synthetic pagination samples. This client pagination is for fixtures only; real datasets require feature services and dedicated TanStack Query hooks with server-managed pagination. No customer backend endpoints, API contracts, or services are implemented.
+
+The selected customer's ID is retained in all profile routes. Only the primary sample profile has supplied activity records; other profiles show their own information and honest empty states. Service categories, keyboard-operated galleries, copy controls, and subscription plan browsing are local interactions. Portraits, product thumbnails, service images, and supporting documents use labelled placeholders because the corresponding image assets are not included. Certificate, membership, insurance, and plan information is static presentation data, not verification evidence.
+
+Create/edit, messaging, password resets, suspension, wallet changes, and unavailable activity destinations remain disabled. Receipt and print controls do not generate or download documents. Tables scroll horizontally inside labelled focusable regions; the profile navigation and plan cards also support local horizontal scrolling without widening the document. Skeletons and empty states are scoped to customer content.
+
 ## Available scripts
 
 | Command                | Purpose                                            |
@@ -157,7 +169,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-Playwright starts its own production server on `127.0.0.1:4317`; keep that port available. Its desktop and mobile Chromium projects cover login routing, denied dashboard access, responsive overflow, authentication panel scrolling, keyboard focus, and not-found recovery. Authentication tests also cover all nine UI routes at 320, 375, 425, 768, 1024, and 1440px, short viewports at 768×600 and 1440×700, local form interactions, and unavailable backend actions. `npm run check` builds the application but does not run Playwright. Browser tests start the production server on port 4317 and a development preview server on port 4318. Production tests deliberately set the preview flag to verify it cannot bypass production access controls. Keep both ports available. The test-only PLAYWRIGHT_PREVIEW flag isolates the development test server in .next-playwright so it can coexist with a normal development session.
+Playwright starts its own production server on `127.0.0.1:4317`; keep that port available. Its desktop and mobile Chromium projects cover login routing, denied dashboard access, responsive overflow, authentication panel scrolling, keyboard focus, and not-found recovery. Authentication tests also cover all nine UI routes at 320, 375, 425, 768, 1024, and 1440px, short viewports at 768×600 and 1440×700, local form interactions, and unavailable backend actions. `npm run check` builds the application but does not run Playwright. Customer browser tests cover all nine views at the same six widths and short heights, URL-state controls, profile routes, galleries, plan browsing, keyboard disclosures, and production access denial. Browser tests start the production server on port 4317 and a development preview server on port 4318. Production tests deliberately set the preview flag to verify it cannot bypass production access controls. Keep both ports available. The test-only PLAYWRIGHT_PREVIEW flag isolates the development test server in .next-playwright so it can coexist with a normal development session.
 
 ## Build and deployment
 

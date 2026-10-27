@@ -10,6 +10,7 @@ export const ROUTES = {
   resetVerify: '/reset-password/verify',
   resetPassword: '/reset-password',
   dashboard: '/dashboard',
+  customers: '/customers',
   forbidden: '/forbidden',
   unauthorized: '/unauthorized',
 } as const;
@@ -32,3 +33,25 @@ export function buildRoute<const Pattern extends string>(
     return encodeURIComponent(String(value));
   });
 }
+
+export const CUSTOMER_TAB_PATHS = {
+  details: '',
+  services: 'services',
+  jobs: 'jobs',
+  listedItems: 'listed-items',
+  orders: 'orders',
+  sales: 'sales',
+  transactions: 'transactions',
+  subscriptions: 'subscriptions',
+} as const;
+export type CustomerTab = keyof typeof CUSTOMER_TAB_PATHS;
+export const CUSTOMER_ROUTES = {
+  details: (customerId: string) =>
+    buildRoute(`${ROUTES.customers}/:customerId`, { customerId }),
+  tab: (customerId: string, tab: CustomerTab) => {
+    const root = buildRoute(`${ROUTES.customers}/:customerId`, { customerId });
+    return CUSTOMER_TAB_PATHS[tab]
+      ? `${root}/${CUSTOMER_TAB_PATHS[tab]}`
+      : root;
+  },
+};

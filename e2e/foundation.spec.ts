@@ -29,6 +29,17 @@ test('dashboard access fails closed without a server session', async ({
   await expect(
     page.getByRole('heading', { name: 'Overview', exact: true }),
   ).toHaveCount(0);
+  for (const path of [
+    '/customers',
+    '/customers/612c54',
+    '/customers/612c54/jobs',
+  ]) {
+    await page.goto(path);
+    await expect(page).toHaveURL('/login');
+    await expect(
+      page.getByRole('heading', { name: 'Tokunbo Ajibade Williams' }),
+    ).toHaveCount(0);
+  }
 });
 
 test('unknown routes recover to the public sign-in entry point', async ({

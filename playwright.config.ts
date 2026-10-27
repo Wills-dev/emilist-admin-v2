@@ -10,17 +10,17 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      testIgnore: '**/overview.spec.ts',
+      testIgnore: ['**/overview.spec.ts', '**/customers.spec.ts'],
       use: { ...devices['Desktop Chrome'] },
     },
     {
       name: 'mobile-chromium',
-      testIgnore: '**/overview.spec.ts',
+      testIgnore: ['**/overview.spec.ts', '**/customers.spec.ts'],
       use: { ...devices['Pixel 7'] },
     },
     {
       name: 'overview-preview',
-      testMatch: '**/overview.spec.ts',
+      testMatch: ['**/overview.spec.ts', '**/customers.spec.ts'],
       use: { ...devices['Desktop Chrome'], baseURL: 'http://127.0.0.1:4318' },
     },
   ],
