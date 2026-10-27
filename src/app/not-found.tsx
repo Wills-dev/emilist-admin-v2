@@ -8,7 +8,7 @@ export default function NotFound() {
         The requested page is unavailable.
       </p>
       <Button asChild>
-        <Link href="/dashboard">Return to overview</Link>
+        <Link href="/login">Return to sign in</Link>
       </Button>
     </main>
   );

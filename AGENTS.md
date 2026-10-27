@@ -71,7 +71,7 @@ Validate public settings and document environment variables in `.env.example`. K
 
 ## Authentication and authorization
 
-The current dashboard shell is public and has no protected data. The server-only session adapter interface and permission helpers are integration infrastructure, not a completed authentication system.
+The dashboard server layout currently redirects to sign-in and has no connected protected data. Keep dashboard access denied until real server-validated authentication is connected. The root entry point is `/login`; authenticated redirects must depend on a verified server session. The server-only session adapter interface and permission helpers are integration infrastructure, not a completed authentication system.
 
 Before adding protected functionality, implement the confirmed session adapter and enforce authentication in the dashboard server layout and authorization close to each server data access/action. Backend APIs must independently enforce permissions; hidden controls and route interception are supplemental only.
 

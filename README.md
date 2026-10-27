@@ -2,7 +2,7 @@
 
 Administration frontend for the Emilist services marketplace, built with Next.js App Router and TypeScript.
 
-The application currently provides a responsive dashboard shell, desktop and mobile navigation, loading skeletons, empty states, error recovery, and access-state pages. Shared API, query, and authorization utilities are available, but live marketplace integrations and production authentication are not connected. The dashboard is public and contains no protected administrative data.
+The application currently provides a responsive dashboard shell, desktop and mobile navigation, loading skeletons, empty states, error recovery, and access-state pages. Shared API, query, and authorization utilities are available, but live marketplace integrations and production authentication are not connected. Dashboard access currently redirects to sign-in until server-validated authentication is connected.
 
 ## Technology stack
 
@@ -15,7 +15,7 @@ The application currently provides a responsive dashboard shell, desktop and mob
 | Testing                 | Vitest, React Testing Library, Playwright                               |
 | Code quality            | ESLint, Prettier                                                        |
 
-React Hook Form and Recharts are installed but are not used by the current screens. Exact dependency versions are recorded in [package.json](package.json) and `package-lock.json`. The project uses TypeScript 6 and ESLint 9 for compatibility with the configured lint plugins; the documented tooling limitation is that ESLint 9 is out of support.
+Authentication forms use React Hook Form and Zod. Recharts is installed but is not used by the current screens. Exact dependency versions are recorded in [package.json](package.json) and `package-lock.json`. The project uses TypeScript 6 and ESLint 9 for compatibility with the configured lint plugins; the documented tooling limitation is that ESLint 9 is out of support.
 
 ## Installation
 
@@ -27,7 +27,7 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Open http://localhost:3000. The root route redirects to `/dashboard`. The shell runs without an API base URL; API requests are rejected until one is configured.
+Open http://localhost:3000. The root route redirects to `/login`. The shell runs without an API base URL; API requests are rejected until one is configured.
 
 ## Environment configuration
 
@@ -98,13 +98,28 @@ Use TanStack Query for remote data, Zustand for shared UI state, URL parameters 
 
 ## Authentication and authorization
 
-`src/lib/auth/session.ts` defines a server-only `SessionAdapter` interface and a `requirePermission` helper. `src/lib/auth/authorization.ts` provides an internal `AdminSession` model and permission checks that deny absent, invalid, or expired sessions. These utilities are not connected to a session backend or the dashboard layout.
+`src/lib/auth/session.ts` defines a server-only `SessionAdapter` interface and a `requirePermission` helper. `src/lib/auth/authorization.ts` provides an internal `AdminSession` model and permission checks that deny absent, invalid, or expired sessions. These utilities are not connected to a session backend. The dashboard server layout denies access by redirecting to `/login` until a real session adapter is implemented. Once connected, authenticated visitors to `/` or `/login` should be redirected to `/dashboard` using a verified server session.
 
-The `/unauthorized` and `/forbidden` routes provide presentation states; they do not enforce HTTP authorization. There is no login or logout workflow. Setting the API base URL alone does not establish authentication.
+The `/unauthorized` and `/forbidden` routes provide presentation states; they do not enforce HTTP authorization. Authentication forms are available, but backend login, logout, invitation verification, enrollment, email delivery, and password changes are not connected. Setting the API base URL alone does not establish authentication.
 
 Protected functionality requires a backend session adapter that verifies server-managed HttpOnly, Secure, SameSite cookies and maps authoritative permissions into the internal session model. Enforce authorization close to server data access and actions, with independent enforcement by backend APIs. UI visibility checks are supplemental. Never store sensitive tokens in localStorage.
 
 Cookie scope, credentialed CORS, CSRF protection, expiry, revocation, and login/logout contracts must be established with the backend. Session-expiration handling must cancel private requests, clear private query data, and use the confirmed login flow; that lifecycle is not yet implemented.
+
+## Authentication UI
+
+| Routes                                      | Interface                                          |
+| ------------------------------------------- | -------------------------------------------------- |
+| `/login`, `/login/verify`                   | Sign-in and authenticator-code entry               |
+| `/accept-invite`                            | Read-only invitation details awaiting backend data |
+| `/accept-invite/password`                   | Password creation and confirmation                 |
+| `/accept-invite/authenticator`              | Authenticator enrollment layout and code entry     |
+| `/forgot-password`, `/forgot-password/sent` | Recovery request and delivery-status view          |
+| `/reset-password/verify`, `/reset-password` | Recovery code entry and password reset             |
+
+Forms support local email/password validation, password visibility, live password requirements, confirmation matching, and six-digit code entry with paste and keyboard navigation. Account setup steps link between UI views without saving or verifying data. The shared authentication layout uses the supplied SVG assets and hides the illustration panel on small screens. It occupies the dynamic viewport height: the header and illustration remain stationary while only the form panel scrolls.
+
+Backend-dependent actions remain disabled even when local fields are valid. The delivery-status view does not claim an email was sent. Invitation details, QR enrollment, and secret-key values remain unavailable until verified backend data exists. No local form completion establishes a session or navigates to the dashboard. Password requirements are UI validation rules and must be reconciled with the backend policy during integration.
 
 ## Available scripts
 
@@ -124,7 +139,7 @@ Cookie scope, credentialed CORS, CSRF protection, expiry, revocation, and login/
 
 ## Testing
 
-Vitest uses jsdom and React Testing Library. Tests are colocated under `src/` and cover permission checks, environment validation, API configuration and error handling, query policy and cache isolation, and button behavior.
+Vitest uses jsdom and React Testing Library. Tests are colocated under `src/` and cover permission checks, environment validation, API configuration and error handling, query policy and cache isolation, button behavior, authentication form validation, password controls, illustration variants, and OTP interactions.
 
 ```sh
 npm run check
@@ -132,7 +147,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-Playwright starts its own production server on `127.0.0.1:4317`; keep that port available. Its desktop and mobile Chromium projects cover redirects, dashboard rendering, responsive overflow, mobile navigation and focus restoration, and not-found recovery. The mobile-navigation test is intentionally skipped in the desktop project. `npm run check` builds the application but does not run Playwright.
+Playwright starts its own production server on `127.0.0.1:4317`; keep that port available. Its desktop and mobile Chromium projects cover login routing, denied dashboard access, responsive overflow, authentication panel scrolling, keyboard focus, and not-found recovery. Authentication tests also cover all nine UI routes at 320, 375, 425, 768, 1024, and 1440px, short viewports at 768×600 and 1440×700, local form interactions, and unavailable backend actions. `npm run check` builds the application but does not run Playwright.
 
 ## Build and deployment
 
