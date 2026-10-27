@@ -23,8 +23,8 @@ import { cn } from '@/lib/utils/cn';
 const primaryItems = [
   { label: 'Overview', icon: House, href: ROUTES.dashboard },
   { label: 'Customers', icon: UsersRound, href: ROUTES.customers },
-  { label: 'Jobs', icon: NotebookText },
-  { label: 'Materials', icon: HandCoins },
+  { label: 'Jobs', icon: NotebookText, href: ROUTES.jobs },
+  { label: 'Materials', icon: HandCoins, href: ROUTES.materials },
   { label: 'Payments', icon: Wallet },
   { label: 'Support', icon: MessageSquare },
 ];

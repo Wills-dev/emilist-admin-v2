@@ -134,7 +134,10 @@ test('view links retain the real selected customer ID and do not reuse another p
   await expect(
     page.getByText('Not provided', { exact: true }).first(),
   ).toBeVisible();
-  await page.getByRole('link', { name: 'Jobs', exact: true }).click();
+  await page
+    .getByRole('main', { name: 'Administration workspace' })
+    .getByRole('link', { name: 'Jobs', exact: true })
+    .click();
   await expect(page).toHaveURL('/customers/raisychen/jobs');
   await expect(
     page.getByText('No records match your search or filters.'),

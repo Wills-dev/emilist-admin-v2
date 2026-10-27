@@ -23,3 +23,9 @@ it('builds customer destinations from the selected ID and actual tab', () => {
     '/customers/raisychen',
   );
 });
+
+it('centralizes management section paths', () => {
+  expect(ROUTES.jobs).toBe('/jobs');
+  expect(ROUTES.materials).toBe('/materials');
+  expect(ROUTES.materialOrders).toBe('/materials/orders');
+});

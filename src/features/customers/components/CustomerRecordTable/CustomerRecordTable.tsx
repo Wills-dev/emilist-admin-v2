@@ -2,8 +2,8 @@
 import type { DataTableColumn } from '@/components/organisms/DataTable/DataTable';
 import { DataTable } from '@/components/organisms/DataTable/DataTable';
 import { Pagination } from '@/components/molecules/Pagination/Pagination';
-import { CustomerTableToolbar } from '@/features/customers/components/CustomerTableToolbar/CustomerTableToolbar';
-import { useFixtureTable } from '@/features/customers/hooks/useFixtureTable/useFixtureTable';
+import { TableToolbar } from '@/components/organisms/TableToolbar/TableToolbar';
+import { useFixtureTable } from '@/hooks/useFixtureTable/useFixtureTable';
 export function CustomerRecordTable<T extends { id: string; status: string }>({
   rows,
   columns,
@@ -27,7 +27,7 @@ export function CustomerRecordTable<T extends { id: string; status: string }>({
   return (
     <section aria-label={label} className="min-w-0 space-y-3">
       {toolbar && (
-        <CustomerTableToolbar
+        <TableToolbar
           label={label}
           count={rows.length}
           search={table.search}

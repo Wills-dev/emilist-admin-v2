@@ -30,6 +30,9 @@ test('dashboard access fails closed without a server session', async ({
     page.getByRole('heading', { name: 'Overview', exact: true }),
   ).toHaveCount(0);
   for (const path of [
+    '/jobs',
+    '/materials',
+    '/materials/orders',
     '/customers',
     '/customers/612c54',
     '/customers/612c54/jobs',

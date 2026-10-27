@@ -1,8 +1,9 @@
 'use client';
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
+import type { LucideIcon } from 'lucide-react';
 import { Search, SlidersHorizontal, UsersRound } from 'lucide-react';
 import { Input } from '@/components/ui/Input/Input';
-export function CustomerTableToolbar({
+export function TableToolbar({
   label,
   count,
   search,
@@ -10,7 +11,10 @@ export function CustomerTableToolbar({
   statuses,
   onSearch,
   onStatus,
-  create = false,
+  action,
+  leading,
+  icon: Icon = UsersRound,
+  filterControls,
 }: {
   label: string;
   count: string | number;
@@ -19,16 +23,21 @@ export function CustomerTableToolbar({
   statuses: readonly string[];
   onSearch: (value: string) => void;
   onStatus: (value: string) => void;
-  create?: boolean;
+  action?: ReactNode;
+  leading?: ReactNode;
+  icon?: LucideIcon;
+  filterControls?: ReactNode;
 }) {
   const [filterOpen, setFilterOpen] = useState(false);
   return (
     <div className="bg-white p-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="flex items-center gap-2 text-[10px] font-medium tracking-widest text-emerald-600">
-          <UsersRound className="size-3.5" />
-          {label.toUpperCase()}: {count}
-        </h2>
+        {leading || (
+          <h2 className="flex items-center gap-2 text-[10px] font-medium tracking-widest text-emerald-600">
+            <Icon aria-hidden="true" className="size-3.5" />
+            {label.toUpperCase()}: {count}
+          </h2>
+        )}
         <div className="flex w-full flex-wrap items-center gap-3 sm:w-auto">
           <button
             type="button"
@@ -53,33 +62,27 @@ export function CustomerTableToolbar({
               className="h-9 rounded-lg border-slate-100 bg-white pl-7 text-[10px]"
             />
           </div>
-          {create && (
-            <button
-              type="button"
-              disabled
-              title="Customer creation requires backend integration"
-              className="h-9 rounded-lg bg-green-500 px-3 text-xs font-medium text-white disabled:cursor-not-allowed"
-            >
-              + Create new customer
-            </button>
-          )}
+          {action}
         </div>
       </div>
       {filterOpen && (
-        <label className="mt-3 flex items-center gap-3 text-xs text-slate-500">
-          Status
-          <select
-            aria-label="Filter by status"
-            value={status}
-            onChange={(event) => onStatus(event.target.value)}
-            className="rounded-lg border border-slate-200 bg-white p-2 focus-visible:outline-2 focus-visible:outline-emerald-600"
-          >
-            <option value="all">All statuses</option>
-            {statuses.map((value) => (
-              <option key={value}>{value}</option>
-            ))}
-          </select>
-        </label>
+        <div className="flex flex-wrap gap-3 motion-safe:animate-[overview-enter_200ms_ease-out]">
+          <label className="mt-3 flex items-center gap-3 text-xs text-slate-500">
+            Status
+            <select
+              aria-label="Filter by status"
+              value={status}
+              onChange={(event) => onStatus(event.target.value)}
+              className="rounded-lg border border-slate-200 bg-white p-2 focus-visible:outline-2 focus-visible:outline-emerald-600"
+            >
+              <option value="all">All statuses</option>
+              {statuses.map((value) => (
+                <option key={value}>{value}</option>
+              ))}
+            </select>
+          </label>
+          {filterControls}
+        </div>
       )}
     </div>
   );

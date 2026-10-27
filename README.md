@@ -131,6 +131,14 @@ Routes are centralized in `src/constants/routes.ts`, including typed route value
 
 The responsive shell retains a fixed header and an independently scrolling content region, with a Radix navigation drawer on narrower screens. Charts load dynamically with local skeletons. Initial cards use 280ms opacity/transform entrances staggered by 50ms; charts animate once over 550–600ms. All entrance/drawer/chart motion is disabled for reduced-motion preferences. CSS keyframes in globals.css supply the scoped entrance and Radix mount/unmount animations that transition utilities alone cannot express.
 
+## Jobs and Materials
+
+`/jobs` provides five job metrics and a nine-row listing with applicant counts, expert references, customer links, status filtering, search, and local pagination. `/materials` provides the Product Catalog; `/materials/orders` provides Orders. Both share five materials metrics, persistent route-based section links, and search, filtering, and pagination. Orders support combined delivery and payment filters.
+
+These screens use typed presentation fixtures in `features/jobs` and `features/materials`, with nine reference records and one explicitly labelled additional sample per collection. Metric totals are design values, not counts of downloaded records. Product image assets are not available; labelled image placeholders are shown. Record details and administrative mutations remain disabled pending supplied detail designs and backend contracts. No backend services or endpoints are implemented for these modules.
+
+Shared `DataTable`, `TableToolbar`, `SummaryMetrics`, `Pagination`, `RecordActions`, `RecordStatus`, and `ManagementSkeleton` components provide the common presentation. `hooks/useFixtureTable` owns local URL state; feature hooks select and filter domain fixtures. Confirmed API services and TanStack Query hooks will belong to each feature when integration contracts are available. Protected backend data must never use the static preview access policy.
+
 ## Customer Management UI
 
 The static dashboard preview also includes Customer Management. `/customers` displays the list; `/customers/[customerId]` displays a selected customer's details. Profile sections use `/customers/[customerId]/services`, `/jobs`, `/listed-items`, `/orders`, `/sales`, `/transactions`, and `/subscriptions`. Use `CUSTOMER_ROUTES` from `src/constants/routes.ts` to build these paths from the selected ID. Unknown IDs and tabs return not-found states. Customer routes expose sample data only; real customer data and mutations require server-validated authentication.
