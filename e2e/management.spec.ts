@@ -169,6 +169,9 @@ test('mobile navigation opens Jobs and Materials and restores focus', async ({
     .getByRole('link', { name: 'Jobs', exact: true })
     .click();
   await expect(page).toHaveURL(ROUTES.jobs);
+  await expect(
+    page.getByRole('heading', { name: 'Jobs', exact: true }),
+  ).toBeAttached();
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await trigger.click();
   await page
@@ -176,6 +179,9 @@ test('mobile navigation opens Jobs and Materials and restores focus', async ({
     .getByRole('link', { name: 'Materials', exact: true })
     .click();
   await expect(page).toHaveURL(ROUTES.materials);
+  await expect(
+    page.getByRole('heading', { name: 'Materials', exact: true }),
+  ).toBeAttached();
   await trigger.click();
   await page.keyboard.press('Escape');
   await expect(trigger).toBeFocused();

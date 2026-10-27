@@ -9,13 +9,19 @@ export function statusTone(
       'Successful',
       'Paid',
       'Verified',
+      'Resolved',
     ].includes(status)
   )
     return 'success';
   if (
-    ['Suspended', 'Overdue', 'Failed', 'Cancelled', 'Out of Stock'].includes(
-      status,
-    )
+    [
+      'Suspended',
+      'Overdue',
+      'Failed',
+      'Cancelled',
+      'Out of Stock',
+      'Revoked',
+    ].includes(status)
   )
     return 'danger';
   if (
