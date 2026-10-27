@@ -1,73 +1,96 @@
-# Emilist Admin engineering conventions
+# Engineering conventions
 
-## Scope and workflow
+## Working standards
 
-This is a long-term production administration application for the Emilist marketplace. Inspect the repository before changes. Explain substantial work, keep changes focused, and implement incrementally. Phase 1 is the foundation only; Phase 2 requires explicit user approval. Never invent backend endpoints, response contracts, authentication, operational data, roles, or final branding. Do not create empty feature directories or placeholder modules. Do not change unrelated files. Do not spawn agents unless explicitly authorized.
+Inspect the repository and relevant configuration before making changes. Keep changes focused, incremental, and consistent with existing behavior. Preserve unrelated work. Do not create empty directories, speculative modules, duplicate components, or premature abstractions. Document material architecture and setup changes.
 
-Use npm and Node 24. Use stable dependencies only, verify peer compatibility, retain package-lock.json, and never use force or legacy-peer-deps to bypass conflicts. Prefer native Next.js features over additional dependencies. Run the relevant checks and accurately disclose blockers. Provide a concise change summary and conventional commit suggestion. Do not commit or deploy without authorization.
+Use Node.js 24 and npm. Keep exact dependency versions and `package-lock.json`; verify stable releases and peer compatibility before dependency changes. Do not use prerelease dependencies, `--force`, or `--legacy-peer-deps` to bypass incompatibilities. Prefer native Next.js capabilities when they meet the requirement without another library.
 
-## Architecture and boundaries
+## Application architecture
 
-- Next.js App Router, TypeScript strict mode, src/ layout, and @/* imports.
-- Keep route files thin: compose feature modules and layouts.
-- Prefer Server Components. Add client boundaries only for interaction, browser APIs, or client providers.
-- Organize business logic under features/<domain>. Feature components, services, schemas, types, and hooks stay with that feature. Do not import implementation details from unrelated features.
-- Use the hybrid feature-based and Atomic Design architecture below for shared UI. Shared infrastructure belongs in lib, environment config in config, and providers in providers.
-- Avoid circular imports, premature abstractions, and large global collections of domain logic.
-- API functions belong in services; remote-data logic belongs in hooks; components handle presentation. Never call Axios from presentation components.
+- Use Next.js App Router, the `src/` structure, `@/*` imports, and strict TypeScript.
+- Keep route files thin: compose feature screens, templates, and layouts.
+- Prefer Server Components. Add client boundaries only for interaction, browser APIs, or client providers; preserve existing server/client boundaries.
+- Keep business domains in `features/<domain>`. Feature components, services, hooks, schemas, and types belong to their domain. Do not import unrelated features' implementation details.
+- Keep shared infrastructure in `lib/`, environment configuration in `config/`, and application providers in `providers/`.
+- API functions belong in feature services, TanStack Query logic in dedicated feature hooks, and presentation logic in components. Never call Axios from presentation components.
+- Avoid circular dependencies, large global collections of domain logic, and unnecessary abstraction. Favor composition and clear TypeScript contracts.
 
 ## Shared UI and Atomic Design
 
-Keep business domains feature-based. Features own their components, services, API hooks, schemas, and types regardless of the visual complexity of their screens. Do not move feature-specific components into global Atomic Design directories merely because they resemble a molecule or organism.
+Use Atomic Design for genuinely reusable UI while preserving feature ownership of domain-specific components.
 
-- components/ui is the shadcn primitive layer and serves as the foundational atom layer (currently Button and Skeleton). Do not create a parallel atoms directory or duplicate primitives. Keep compound shadcn primitives intact in ui rather than splitting their internals across atomic levels. Preserve components.json aliases and Radix behavior.
-- components/molecules contains focused, domain-independent combinations such as PageHeader and EmptyState.
-- components/organisms contains substantial shared interface regions such as DashboardHeader and DashboardSidebar.
-- components/templates contains reusable layout composition such as DashboardLayout. Templates accept content and compose shared regions; they do not fetch business data.
-- Routes compose feature screens and templates. Features may import shared UI. Shared UI must not import feature-specific services, schemas, types, or API hooks. Shared UI may use shared UI hooks such as useSidebarStore.
+| Directory                   | Responsibility                                                               |
+| --------------------------- | ---------------------------------------------------------------------------- |
+| `src/components/ui/`        | shadcn primitives and foundational atoms, including Button and Skeleton      |
+| `src/components/molecules/` | Focused domain-independent combinations, including PageHeader and EmptyState |
+| `src/components/organisms/` | Shared interface regions, including DashboardHeader and DashboardSidebar     |
+| `src/components/templates/` | Layout composition, including DashboardLayout                                |
 
-Treat the levels as composition guidance, not a requirement to wrap every element or pass through every level. Keep ui independent of higher shared levels; molecules may use ui, organisms may compose lower-level UI, and templates may compose shared regions. Avoid circular dependencies. Promote components only when domain-independent reuse is justified. Preserve props, accessibility, responsive behavior, and client/server boundaries during organizational changes. Do not create unused folders, new abstractions, or blanket client boundaries.
+Do not create a parallel `atoms/` directory or duplicate shadcn primitives. Keep compound shadcn components intact in `ui/`, preserving `components.json` aliases and Radix accessibility behavior.
 
-## Screenshot-driven screen workflow
+Keep `ui/` independent of higher shared levels. Molecules may compose primitives, organisms may compose lower-level UI, and templates may compose shared regions and accept screen content. Templates must not fetch business data. Atomic levels are guidance for composition, not a requirement to wrap every element or use every level.
 
-Wait for the user's first design screenshot before starting Phase 2 screens. Implement screens progressively within the approved scope, using supplied screenshots and assets as the visual reference. Preserve visual fidelity, spacing, typography, states, and responsive behavior; verify supplied viewport sizes and sensible layouts between them. Clarify material missing design details instead of inventing approved branding. Extract shared UI only when actual reuse warrants it.
-
-Forms may have UI and Zod validation before an API is available. Form validation is not proof of a backend payload contract. Clearly communicate unavailable submission, and do not simulate successful backend submissions, authentication, mutations, success toasts, or saved state. Connect submission only when real endpoints, payloads, response contracts, and authorization requirements are supplied. Keep API calls in feature services and TanStack Query logic in dedicated feature hooks.
+Features may import shared UI. Shared UI must not import feature-specific services, schemas, types, or API hooks. Shared UI may consume shared UI hooks such as `useSidebarStore`. Promote a component to shared UI only when domain-independent reuse is justified; visual complexity alone is insufficient.
 
 ## Mandatory naming
 
-Every reusable React component has its own PascalCase directory and matching PascalCase.tsx file. Colocate meaningful component tests as ComponentName.test.tsx. Every custom hook starts with use, uses camelCase, and has its own matching folder and filename, e.g. hooks/useGetUsers/useGetUsers.ts. Store hooks follow the same rule. Utilities, service modules, and store files use descriptive camelCase. Type and interface identifiers use PascalCase; fixed constants use UPPER_SNAKE_CASE where appropriate. Preserve Next.js required filenames such as page.tsx, layout.tsx, error.tsx, loading.tsx, route.ts, and proxy.ts.
-
-shadcn CLI output must be moved to the PascalCase convention and its imports updated before completion; never leave kebab-case component files. Barrel exports are optional and must not obscure server/client boundaries.
+- Every reusable React component must have its own PascalCase folder and matching `.tsx` filename: `Button/Button.tsx`.
+- Every custom hook must begin with `use`, use camelCase, and have a dedicated matching folder and filename: `useGetUsers/useGetUsers.ts`. Store hooks follow the same rule.
+- Colocate meaningful tests: `Button.test.tsx` or `useGetUsers.test.ts`.
+- Utilities, services, and store modules use descriptive camelCase filenames. Type and interface identifiers use PascalCase; fixed constants use UPPER_SNAKE_CASE where appropriate.
+- Preserve required Next.js filenames, including `page.tsx`, `layout.tsx`, `loading.tsx`, `error.tsx`, `route.ts`, and `proxy.ts`.
+- Move generated shadcn component files into the PascalCase convention and update their imports. Do not leave kebab-case component files. Optional barrel exports must preserve clear server/client boundaries.
 
 ## Styling and accessibility
 
-Tailwind CSS v4 is the primary styling system. Use semantic CSS variables and @theme inline tokens in globals.css, shadcn/ui patterns, Radix primitives, Lucide icons, and cn() for conditional classes. Tokens are temporary neutral values, not approved Emilist branding. Light mode only until design approval requires otherwise.
+Tailwind CSS v4 is the primary styling system. Use utility classes, semantic CSS variables and `@theme inline` tokens from `src/app/globals.css`, shadcn patterns, Radix primitives, Lucide icons, and `cn()` for conditional classes. Preserve the current light theme and neutral tokens unless design requirements change. Do not invent brand specifications.
 
-Use utilities for spacing, layout, responsive behavior, typography, and states. Avoid CSS Modules, component stylesheets, inline styles, unnecessary !important, and arbitrary values where tokens suffice. Explain any necessary custom CSS. globals.css is for Tailwind imports, tokens, and global base styles.
+Use utilities for layout, spacing, typography, responsiveness, and interaction states. Avoid ordinary component CSS Modules, separate component stylesheets, inline styles where utilities suffice, unnecessary `!important`, and arbitrary values when design tokens are suitable. Limit global CSS to imports, tokens, resets, fonts, and genuinely global styles. Explain custom CSS when utilities are insufficient.
 
-Provide accessible names, labels, contrast, semantic structure, visible focus, keyboard navigation, and responsive layouts. Include loading skeletons matching content shape, empty/error/retry states, and specific localized pending action labels. Disable pending actions to prevent duplicate submissions. Use Sonner for appropriate action notifications and inline validation for form fields. Avoid blanket loading overlays.
+Provide semantic markup, accessible names and labels, sufficient contrast, visible keyboard focus, logical navigation, and responsive layouts. Preserve modal focus management and Escape behavior. Implement loading skeletons shaped like the expected content, refetching indicators, empty states, recoverable errors, and disabled/pending states. Use localized action labels such as “Saving” and prevent duplicate submissions. Use inline form errors and appropriate Sonner feedback; avoid blanket loading overlays.
 
-## State, API, and security
+## State and forms
 
-- TanStack Query owns remote data, caching, refetches, mutations, and invalidation. Use centralized query keys, serializable filters, and cancellation signals. Do not copy server data into Zustand.
-- Zustand owns appropriate shared UI state. Local React state handles component interactions. URL parameters own shareable search, sorting, filters, pagination, and tabs. React Hook Form and Zod handle complex forms.
-- Use centralized Axios configuration with environment base URL, bounded timeout, credentials, and safe error normalization. Use feature services with typed contracts and runtime validation where appropriate. Pass AbortSignal through services. Document provisional contracts explicitly. Do not log secrets or personal information or display raw backend errors.
-- Before enabling protected admin data or actions, implement a confirmed server session adapter and enforce authorization close to every server data access/action. The Phase 1 shell is public and contains no protected data.
-- Prefer server-managed HttpOnly, Secure, SameSite cookies. Never store sensitive tokens in localStorage or expose secrets via NEXT_PUBLIC_. Backend APIs independently enforce every permission. UI checks and route interception are supplemental only.
-- Get actual role/permission definitions from the backend. Deny absent, invalid, or expired sessions. Never infer super-admin privileges or implement fictional authentication.
-- On session expiration, integrate server-confirmed session handling, cancel and clear private query data, and route to the confirmed login flow. Do not blindly redirect every 401 or retry unauthorized mutations.
-- Verify CORS, CSRF protection for cookie-authenticated mutations, cookie scope, logout, expiry, MFA requirements, and trusted origins with the backend. Never automatically replay sensitive mutations.
-- Validate environment settings; document required variables in .env.example. Never commit actual secrets.
+- TanStack Query owns remote data, caching, refetching, mutations, and invalidation. Do not duplicate remote data in Zustand.
+- Zustand owns shared UI state. Local React state owns transient component interactions.
+- URL parameters own shareable search, sorting, filters, pagination, and tabs.
+- Use React Hook Form and Zod for complex forms with typed validation, accessible labels, field errors, server-error mapping, and submission feedback.
+
+Form UI and validation may exist before backend integration, but validation does not establish a backend payload contract. Make unavailable submission clear. Never simulate successful submissions, authentication, mutations, notifications, or saved state. Connect submission only to supplied backend endpoints, payloads, response contracts, and authorization requirements.
+
+## API integration
+
+Use the centralized Axios client with validated environment configuration, bounded timeout, credentials, relative endpoint paths, and safe normalized errors. Feature services own typed request/response contracts and runtime validation where appropriate. Pass `AbortSignal` through service functions for cancellation. Never display raw backend errors or log credentials or personal information.
+
+Use only supplied backend endpoints and contracts. Do not invent production APIs, roles, operational data, or authentication. Clearly label internal provisional models and adapters rather than presenting them as confirmed backend contracts. Do not create placeholder services without a real integration requirement.
+
+Use centralized query-key conventions with serializable filters and no credentials. Invalidate the relevant domain after successful mutations. Preserve per-provider query-cache isolation. Retry only appropriate transient query failures; do not retry authorization failures or automatically replay sensitive mutations. Handle cancellations without error toasts.
+
+Validate public settings and document environment variables in `.env.example`. Keep private settings server-only. Never commit secrets or expose them through `NEXT_PUBLIC_` variables.
+
+## Authentication and authorization
+
+The current dashboard shell is public and has no protected data. The server-only session adapter interface and permission helpers are integration infrastructure, not a completed authentication system.
+
+Before adding protected functionality, implement the confirmed session adapter and enforce authentication in the dashboard server layout and authorization close to each server data access/action. Backend APIs must independently enforce permissions; hidden controls and route interception are supplemental only.
+
+Prefer server-managed HttpOnly, Secure, SameSite cookies. Never store sensitive access tokens in localStorage. Map authoritative backend roles and permissions explicitly; deny absent, invalid, or expired sessions and do not infer privileged access.
+
+Establish cookie scope, credentialed CORS origins, CSRF protection, session expiry/revocation, login/logout, profile, and MFA requirements with the backend as applicable. On confirmed session expiration, cancel private requests, clear private query caches, and use the confirmed login flow. Do not blindly redirect every 401 or expose backend error details.
 
 ## Tables and performance
 
-Use server-managed pagination/sorting/filtering for large datasets, URL state when shareable, accessible overflow, and feature-independent table primitives when needed. Do not build a generic table framework before actual contracts exist. Evaluate TanStack Table when warranted.
+Use server-side pagination, sorting, and filtering for large datasets, with URL state where shareable. Include accessible overflow, row actions, loading, empty, error, and pending states as needed. Keep reusable table primitives domain-independent, and implement bulk actions only with authorization. Evaluate TanStack Table when a real workflow justifies it; avoid building a generic table framework before requirements exist.
 
-Keep bundles small, dynamically load charts and expensive interactions when useful, avoid waterfalls and unnecessary effects, and add memoization only for clear benefits. Do not add unused providers or import heavy chart libraries globally.
+Keep client bundles small, lazy-load charts and expensive interfaces where useful, avoid request waterfalls and unnecessary effects, and use memoization only for clear benefits. Do not add unused providers or import heavy chart libraries globally.
 
-## Verification and documentation
+## Testing and verification
 
-Use Vitest and React Testing Library for meaningful behavior: permissions, session integration, validation, errors, hooks, and workflows. Playwright covers critical browser journeys. Avoid redundant implementation-mirroring tests and unnecessary snapshots. Never weaken TypeScript/ESLint merely to silence errors; avoid any and narrow unknown instead.
+Use Vitest and React Testing Library for meaningful behavior, prioritizing authorization, validation, API errors, query hooks, tables, and administrative workflows. Use Playwright for critical browser journeys and responsive interaction checks. Avoid redundant implementation-mirroring tests and unnecessary snapshots.
 
-Before completion run npm run typecheck, npm run lint, npm run format:check, npm test, npm run build, and relevant Playwright tests (build first). Resolve failures or disclose exactly what remains blocked. Update README when setup/architecture changes. Document backend integration boundaries and security limitations. Do not claim checks passed unless they actually ran successfully.
+Do not weaken TypeScript or ESLint to hide problems. Avoid `any`; use `unknown` and narrowing. Preserve meaningful tests and adjust them when observable behavior changes.
+
+For application changes, run `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm test`, and `npm run build`. Run relevant Playwright tests after building. `npm run check` combines the checks except Playwright. For documentation-only changes, verify commands, paths, implementation claims, and document formatting; application tests need not be repeated unless executable behavior changes.
+
+Resolve regressions or report the exact verification blocker. Never claim a check passed unless it ran successfully. Keep README aligned with implemented capabilities and distinguish integration requirements from working functionality. Summarize changes, validation, and material limitations, and suggest a conventional commit message.
