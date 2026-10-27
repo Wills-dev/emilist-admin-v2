@@ -1,4 +1,5 @@
 'use client';
+import { ROUTES } from '@/constants/routes';
 import { Controller, useForm } from 'react-hook-form';
 import { OtpInput } from '@/features/auth/components/OtpInput/OtpInput';
 import { AuthAccountSummary } from '@/features/auth/components/AuthAccountSummary/AuthAccountSummary';
@@ -41,7 +42,7 @@ export function VerificationForm({
         </p>
       </div>
       <AuthActions
-        backHref="/login"
+        backHref={ROUTES.login}
         backLabel={
           reset || enrollment ? 'Back to Sign In' : 'Back to Password Sign In'
         }

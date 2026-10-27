@@ -1,3 +1,4 @@
+import { ROUTES } from '@/constants/routes';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button/Button';
 export default function NotFound() {
@@ -8,7 +9,7 @@ export default function NotFound() {
         The requested page is unavailable.
       </p>
       <Button asChild>
-        <Link href="/login">Return to sign in</Link>
+        <Link href={ROUTES.login}>Return to sign in</Link>
       </Button>
     </main>
   );

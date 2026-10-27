@@ -2,7 +2,7 @@
 
 Administration frontend for the Emilist services marketplace, built with Next.js App Router and TypeScript.
 
-The application currently provides a responsive dashboard shell, desktop and mobile navigation, loading skeletons, empty states, error recovery, and access-state pages. Shared API, query, and authorization utilities are available, but live marketplace integrations and production authentication are not connected. Dashboard access currently redirects to sign-in until server-validated authentication is connected.
+The application currently provides a responsive dashboard shell, desktop and mobile navigation, loading skeletons, empty states, error recovery, and access-state pages. Shared API, query, and authorization utilities are available, but live marketplace integrations and production authentication are not connected. Production dashboard access redirects to sign-in until server-validated authentication is connected. An explicit development-only opt-in exposes a static Overview UI preview.
 
 ## Technology stack
 
@@ -15,7 +15,7 @@ The application currently provides a responsive dashboard shell, desktop and mob
 | Testing                 | Vitest, React Testing Library, Playwright                               |
 | Code quality            | ESLint, Prettier                                                        |
 
-Authentication forms use React Hook Form and Zod. Recharts is installed but is not used by the current screens. Exact dependency versions are recorded in [package.json](package.json) and `package-lock.json`. The project uses TypeScript 6 and ESLint 9 for compatibility with the configured lint plugins; the documented tooling limitation is that ESLint 9 is out of support.
+Authentication forms use React Hook Form and Zod. Overview charts use Recharts through the shared shadcn-style chart container. Exact dependency versions are recorded in [package.json](package.json) and `package-lock.json`. The project uses TypeScript 6 and ESLint 9 for compatibility with the configured lint plugins; the documented tooling limitation is that ESLint 9 is out of support.
 
 ## Installation
 
@@ -98,7 +98,7 @@ Use TanStack Query for remote data, Zustand for shared UI state, URL parameters 
 
 ## Authentication and authorization
 
-`src/lib/auth/session.ts` defines a server-only `SessionAdapter` interface and a `requirePermission` helper. `src/lib/auth/authorization.ts` provides an internal `AdminSession` model and permission checks that deny absent, invalid, or expired sessions. These utilities are not connected to a session backend. The dashboard server layout denies access by redirecting to `/login` until a real session adapter is implemented. Once connected, authenticated visitors to `/` or `/login` should be redirected to `/dashboard` using a verified server session.
+`src/lib/auth/session.ts` defines a server-only `SessionAdapter` interface and a `requirePermission` helper. `src/lib/auth/authorization.ts` provides an internal `AdminSession` model and permission checks that deny absent, invalid, or expired sessions. These utilities are not connected to a session backend. The dashboard server layout denies production access by redirecting to `/login` until a real session adapter is implemented. Local UI preview access is a separate development-only path and does not establish a session. Once connected, authenticated visitors to `/` or `/login` should be redirected to `/dashboard` using a verified server session.
 
 The `/unauthorized` and `/forbidden` routes provide presentation states; they do not enforce HTTP authorization. Authentication forms are available, but backend login, logout, invitation verification, enrollment, email delivery, and password changes are not connected. Setting the API base URL alone does not establish authentication.
 
@@ -119,7 +119,17 @@ Cookie scope, credentialed CORS, CSRF protection, expiry, revocation, and login/
 
 Forms support local email/password validation, password visibility, live password requirements, confirmation matching, and six-digit code entry with paste and keyboard navigation. Account setup steps link between UI views without saving or verifying data. The shared authentication layout uses the supplied SVG assets and hides the illustration panel on small screens. It occupies the dynamic viewport height: the header and illustration remain stationary while only the form panel scrolls.
 
-Backend-dependent actions remain disabled even when local fields are valid. The delivery-status view does not claim an email was sent. Invitation details, QR enrollment, and secret-key values remain unavailable until verified backend data exists. No local form completion establishes a session or navigates to the dashboard. Password requirements are UI validation rules and must be reconciled with the backend policy during integration.
+Backend-dependent actions remain disabled even when local fields are valid. The explicit development preview described below permits only navigation to static UI fixtures. The delivery-status view does not claim an email was sent. Invitation details, QR enrollment, and secret-key values remain unavailable until verified backend data exists. No local form completion establishes a session or navigates to the dashboard. Password requirements are UI validation rules and must be reconciled with the backend policy during integration.
+
+## Overview UI preview
+
+Set `DASHBOARD_UI_PREVIEW=true` in `.env.local` and run `npm run dev` to review `/dashboard`. The flag is server-only, requires an exact `true` value, and is ignored unless `NODE_ENV` is `development`. With the flag off, dashboard access redirects to `/login`. With it on, the existing Sign In button navigates directly to the preview without requiring credentials; it sends no credentials and creates no tokens or session. Production builds deny access even when the flag is set.
+
+The Overview includes quick search, operational metrics, transaction/job/customer donut charts, a revenue trend, quick actions, and trade totals. `src/features/dashboard/fixtures/overviewFixtures.ts` owns the static presentation values. These are not API responses or live records. The job category sum differs from the supplied center total by 10; the visual reference values are retained. Intermediate revenue trend points are approximate presentation values. Search reports that its service is unavailable; date selection updates only the control, not the fixtures. Unimplemented destinations and administrative actions are disabled. “Sign out” leaves the preview for sign-in without claiming to revoke a session.
+
+Routes are centralized in `src/constants/routes.ts`, including typed route values and an encoded dynamic-path builder. Feature services and query hooks remain reserved for actual backend integration; there are no invented dashboard endpoints.
+
+The responsive shell retains a fixed header and an independently scrolling content region, with a Radix navigation drawer on narrower screens. Charts load dynamically with local skeletons. Initial cards use 280ms opacity/transform entrances staggered by 50ms; charts animate once over 550–600ms. All entrance/drawer/chart motion is disabled for reduced-motion preferences. CSS keyframes in globals.css supply the scoped entrance and Radix mount/unmount animations that transition utilities alone cannot express.
 
 ## Available scripts
 
@@ -147,7 +157,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-Playwright starts its own production server on `127.0.0.1:4317`; keep that port available. Its desktop and mobile Chromium projects cover login routing, denied dashboard access, responsive overflow, authentication panel scrolling, keyboard focus, and not-found recovery. Authentication tests also cover all nine UI routes at 320, 375, 425, 768, 1024, and 1440px, short viewports at 768×600 and 1440×700, local form interactions, and unavailable backend actions. `npm run check` builds the application but does not run Playwright.
+Playwright starts its own production server on `127.0.0.1:4317`; keep that port available. Its desktop and mobile Chromium projects cover login routing, denied dashboard access, responsive overflow, authentication panel scrolling, keyboard focus, and not-found recovery. Authentication tests also cover all nine UI routes at 320, 375, 425, 768, 1024, and 1440px, short viewports at 768×600 and 1440×700, local form interactions, and unavailable backend actions. `npm run check` builds the application but does not run Playwright. Browser tests start the production server on port 4317 and a development preview server on port 4318. Production tests deliberately set the preview flag to verify it cannot bypass production access controls. Keep both ports available. The test-only PLAYWRIGHT_PREVIEW flag isolates the development test server in .next-playwright so it can coexist with a normal development session.
 
 ## Build and deployment
 

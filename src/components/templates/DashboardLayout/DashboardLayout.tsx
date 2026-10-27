@@ -1,24 +1,34 @@
+import type { DashboardProfile } from '@/types/DashboardProfile';
 import type { ReactNode } from 'react';
 import { DashboardSidebar } from '@/components/organisms/DashboardSidebar/DashboardSidebar';
 import { DashboardHeader } from '@/components/organisms/DashboardHeader/DashboardHeader';
-export function DashboardLayout({ children }: { children: ReactNode }) {
+export function DashboardLayout({
+  children,
+  profile,
+  date,
+}: {
+  children: ReactNode;
+  profile: DashboardProfile;
+  date: string;
+}) {
   return (
-    <div className="flex min-h-dvh">
+    <div className="relative flex h-dvh max-h-dvh flex-col overflow-hidden bg-[#f5f7f5] text-[#343b36]">
       <a
         href="#main-content"
-        className="sr-only z-50 rounded-md bg-primary p-3 text-primary-foreground focus:not-sr-only focus:fixed focus:top-2 focus:left-2"
+        className="sr-only z-50 rounded-md bg-white p-3 text-emerald-700 focus:not-sr-only focus:fixed focus:top-2 focus:left-2"
       >
         Skip to content
       </a>
-      <DashboardSidebar />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <DashboardHeader />
+      <DashboardHeader date={date} initials={profile.initials} />
+      <div className="flex min-h-0 flex-1 overflow-hidden">
+        <DashboardSidebar profile={profile} />
         <main
           id="main-content"
-          tabIndex={-1}
-          className="mx-auto w-full max-w-7xl flex-1 space-y-8 p-4 sm:p-8"
+          tabIndex={0}
+          aria-label="Overview dashboard"
+          className="relative min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain p-3"
         >
-          {children}
+          <div className="mx-auto max-w-400">{children}</div>
         </main>
       </div>
     </div>

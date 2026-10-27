@@ -71,7 +71,7 @@ Validate public settings and document environment variables in `.env.example`. K
 
 ## Authentication and authorization
 
-The dashboard server layout currently redirects to sign-in and has no connected protected data. Keep dashboard access denied until real server-validated authentication is connected. The root entry point is `/login`; authenticated redirects must depend on a verified server session. The server-only session adapter interface and permission helpers are integration infrastructure, not a completed authentication system.
+The dashboard server layout currently redirects to sign-in and has no connected protected data. Keep production dashboard access denied until real server-validated authentication is connected. The explicit local dashboard UI preview requires both NODE_ENV=development and DASHBOARD_UI_PREVIEW=true; never use it to serve real protected data/actions or establish a session. Keep static presentation fixtures separate from API contracts and clearly labelled. The root entry point is `/login`; authenticated redirects must depend on a verified server session. The server-only session adapter interface and permission helpers are integration infrastructure, not a completed authentication system.
 
 Before adding protected functionality, implement the confirmed session adapter and enforce authentication in the dashboard server layout and authorization close to each server data access/action. Backend APIs must independently enforce permissions; hidden controls and route interception are supplemental only.
 
@@ -94,3 +94,13 @@ Do not weaken TypeScript or ESLint to hide problems. Avoid `any`; use `unknown` 
 For application changes, run `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm test`, and `npm run build`. Run relevant Playwright tests after building. `npm run check` combines the checks except Playwright. For documentation-only changes, verify commands, paths, implementation claims, and document formatting; application tests need not be repeated unless executable behavior changes.
 
 Resolve regressions or report the exact verification blocker. Never claim a check passed unless it ran successfully. Keep README aligned with implemented capabilities and distinguish integration requirements from working functionality. Summarize changes, validation, and material limitations, and suggest a conventional commit message.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

@@ -8,12 +8,34 @@ export default defineConfig({
   reporter: 'list',
   use: { baseURL: 'http://127.0.0.1:4317', trace: 'retain-on-failure' },
   projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-    { name: 'mobile-chromium', use: { ...devices['Pixel 7'] } },
+    {
+      name: 'chromium',
+      testIgnore: '**/overview.spec.ts',
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'mobile-chromium',
+      testIgnore: '**/overview.spec.ts',
+      use: { ...devices['Pixel 7'] },
+    },
+    {
+      name: 'overview-preview',
+      testMatch: '**/overview.spec.ts',
+      use: { ...devices['Desktop Chrome'], baseURL: 'http://127.0.0.1:4318' },
+    },
   ],
-  webServer: {
-    command: 'npm run start -- --hostname 127.0.0.1 --port 4317',
-    url: 'http://127.0.0.1:4317',
-    reuseExistingServer: false,
-  },
+  webServer: [
+    {
+      command: 'npm run start -- --hostname 127.0.0.1 --port 4317',
+      url: 'http://127.0.0.1:4317',
+      reuseExistingServer: false,
+      env: { DASHBOARD_UI_PREVIEW: 'true' },
+    },
+    {
+      command: 'npm run dev -- --hostname 127.0.0.1 --port 4318',
+      url: 'http://127.0.0.1:4318',
+      reuseExistingServer: false,
+      env: { DASHBOARD_UI_PREVIEW: 'true', PLAYWRIGHT_PREVIEW: 'true' },
+    },
+  ],
 });

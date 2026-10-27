@@ -1,5 +1,7 @@
 'use client';
+import { ROUTES } from '@/constants/routes';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { Input } from '@/components/ui/Input/Input';
 import { AuthField } from '@/features/auth/components/AuthField/AuthField';
@@ -7,7 +9,12 @@ import { PasswordField } from '@/features/auth/components/PasswordField/Password
 import { AuthActions } from '@/features/auth/components/AuthActions/AuthActions';
 import { emailSchema } from '@/features/auth/schemas/authSchemas';
 
-export function LoginForm() {
+export function LoginForm({
+  previewEnabled = false,
+}: {
+  previewEnabled?: boolean;
+}) {
+  const router = useRouter();
   const {
     register,
     formState: { errors },
@@ -18,7 +25,10 @@ export function LoginForm() {
   return (
     <form
       noValidate
-      onSubmit={(event) => event.preventDefault()}
+      onSubmit={(event) => {
+        event.preventDefault();
+        if (previewEnabled) router.push(ROUTES.dashboard);
+      }}
       className="space-y-6"
     >
       <AuthField
@@ -61,7 +71,7 @@ export function LoginForm() {
             Keep me signed in for 12 hours
           </label>
           <Link
-            href="/forgot-password"
+            href={ROUTES.forgotPassword}
             className="font-medium text-emerald-700 underline-offset-4 hover:underline"
           >
             Forgot Password?
@@ -69,8 +79,13 @@ export function LoginForm() {
         </div>
       </div>
       <AuthActions
-        submitLabel="Proceed"
-        unavailable="Sign-in is unavailable until the authentication service is connected."
+        submitLabel={previewEnabled ? 'Sign In' : 'Proceed'}
+        disabled={!previewEnabled}
+        unavailable={
+          previewEnabled
+            ? 'UI preview only — static sample data. No authentication or backend actions.'
+            : 'Sign-in is unavailable until the authentication service is connected.'
+        }
       />
     </form>
   );
