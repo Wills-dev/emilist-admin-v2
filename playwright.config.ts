@@ -29,13 +29,13 @@ export default defineConfig({
       command: 'npm run start -- --hostname 127.0.0.1 --port 4317',
       url: 'http://127.0.0.1:4317',
       reuseExistingServer: false,
-      env: { DASHBOARD_UI_PREVIEW: 'true' },
+      env: { DASHBOARD_UI_PREVIEW: 'false' },
     },
     {
-      command: 'npm run dev -- --hostname 127.0.0.1 --port 4318',
+      command: 'npm run start -- --hostname 127.0.0.1 --port 4318',
       url: 'http://127.0.0.1:4318',
       reuseExistingServer: false,
-      env: { DASHBOARD_UI_PREVIEW: 'true', PLAYWRIGHT_PREVIEW: 'true' },
+      env: { DASHBOARD_UI_PREVIEW: 'true' },
     },
   ],
 });
