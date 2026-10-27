@@ -80,9 +80,11 @@ export type AuthScreenName = keyof typeof screens;
 export function AuthScreen({
   screen,
   previewEnabled = false,
+  demoMode = false,
 }: {
   screen: AuthScreenName;
   previewEnabled?: boolean;
+  demoMode?: boolean;
 }) {
   const config = screens[screen];
   const invitation = config.variant === 'signup';
@@ -99,7 +101,9 @@ export function AuthScreen({
       {(screen === 'resetVerify' || screen === 'resetPassword') && (
         <AuthSteps reset current={screen === 'resetVerify' ? 1 : 2} />
       )}
-      {screen === 'login' && <LoginForm previewEnabled={previewEnabled} />}
+      {screen === 'login' && (
+        <LoginForm demoMode={demoMode} previewEnabled={previewEnabled} />
+      )}
       {screen === 'loginVerify' && <VerificationForm />}
       {screen === 'invite' && (
         <>

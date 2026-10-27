@@ -6,16 +6,19 @@ it('keeps one independent selection per category without enabling publication', 
   const user = userEvent.setup();
   render(<SpotlightSettings />);
   const first = screen.getByLabelText(
-    'Select Tokunbo Ajibade Williams expert-tokunbo',
+    'Select Demo Customer One demo-expert-001',
   );
-  const second = screen.getByLabelText('Select Isaac Okonkwo expert-isaac', {
-    exact: true,
-  });
+  const second = screen.getByLabelText(
+    'Select Demo Candidate Alpha demo-expert-002',
+    {
+      exact: true,
+    },
+  );
   await user.click(second);
   expect(second).toBeChecked();
   expect(first).not.toBeChecked();
   expect(
-    screen.getByLabelText('Select Isaac Okonkwo merchant-isaac'),
+    screen.getByLabelText('Select Demo Candidate Alpha demo-merchant-001'),
   ).toBeChecked();
   expect(screen.getByRole('button', { name: 'Publish' })).toBeDisabled();
   await user.type(

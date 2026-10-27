@@ -14,7 +14,7 @@ export function OverviewToolbar() {
             role="note"
             className="font-normal tracking-normal text-[#788096]"
           >
-            Development preview · Static presentation data
+            Static UI preview · Synthetic presentation data
           </span>
         </p>
         <div className="mt-2 flex flex-wrap items-center gap-3">

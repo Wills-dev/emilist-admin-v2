@@ -118,7 +118,7 @@ test('sign-in button opens the preview without credentials or a session', async 
   expect(await context.cookies()).toEqual([]);
   expect(await page.evaluate(() => localStorage.length)).toBe(0);
   await expect(page.getByRole('note')).toContainText(
-    'Static presentation data',
+    'Synthetic presentation data',
   );
 });
 

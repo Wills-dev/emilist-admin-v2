@@ -39,13 +39,13 @@ test('dashboard access fails closed without a server session', async ({
     '/materials',
     '/materials/orders',
     '/customers',
-    '/customers/612c54',
-    '/customers/612c54/jobs',
+    '/customers/demo-customer-001',
+    '/customers/demo-customer-001/jobs',
   ]) {
     await page.goto(path);
     await expect(page).toHaveURL('/login');
     await expect(
-      page.getByRole('heading', { name: 'Tokunbo Ajibade Williams' }),
+      page.getByRole('heading', { name: 'Demo Customer One' }),
     ).toHaveCount(0);
   }
 });

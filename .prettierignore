@@ -7,3 +7,6 @@ playwright-report
 test-results
 
 .next-playwright
+
+.next-demo/
+.test-deployment/

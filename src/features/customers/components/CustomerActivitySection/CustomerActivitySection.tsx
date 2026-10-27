@@ -23,7 +23,7 @@ export function CustomerActivitySection({
   customerId: string;
   kind: CustomerActivityKind;
 }) {
-  const sample = customerId === '612c54';
+  const sample = customerId === 'demo-customer-001';
   switch (kind) {
     case 'jobs':
       return (

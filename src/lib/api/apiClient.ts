@@ -11,6 +11,11 @@ export const apiClient = axios.create({
 });
 
 apiClient.interceptors.request.use((config) => {
+  if (process.env.EMILIST_BUILD_TARGET === 'demo')
+    throw new ApiError(
+      'Administrative network requests are disabled in demo mode.',
+      'configuration',
+    );
   if (!publicEnv.apiBaseUrl)
     throw new ApiError(
       'API integration has not been configured.',

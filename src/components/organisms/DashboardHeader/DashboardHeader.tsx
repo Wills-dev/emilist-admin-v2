@@ -4,9 +4,11 @@ import { Bell, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/Button/Button';
 import { useSidebarStore } from '@/hooks/useSidebarStore/useSidebarStore';
 export function DashboardHeader({
+  demoMode = false,
   date,
   initials,
 }: {
+  demoMode?: boolean;
   date: string;
   initials: string;
 }) {
@@ -32,10 +34,10 @@ export function DashboardHeader({
           width={163}
           height={38}
           priority
-          className="h-auto w-28 sm:w-36"
+          className={demoMode ? 'h-auto w-20 sm:w-36' : 'h-auto w-28 sm:w-36'}
         />
-        <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] text-emerald-800">
-          Admin
+        <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] whitespace-nowrap text-emerald-800">
+          {demoMode ? 'Demo Mode' : 'Admin'}
         </span>
       </div>
       <div className="flex shrink-0 items-center gap-4 sm:gap-6">

@@ -3,10 +3,10 @@ import type { DonutSummary } from '@/features/dashboard/types/overviewTypes';
 // Static presentation fixtures transcribed from the visual reference. Never live API data.
 export const OVERVIEW_FIXTURES = {
   date: 'Sunday, 27 September, 2027',
-  displayName: 'Ayodeji Agboola',
-  initials: 'AA',
-  role: 'Super Admin',
-  adminId: 'Dej13356',
+  displayName: 'Demo Operator',
+  initials: 'DM',
+  role: 'Demo persona',
+  adminId: 'demo-admin-001',
   metrics: [
     {
       title: 'Pending KYC',

@@ -20,7 +20,7 @@ const photos = Array.from(
 
 export function CustomerServices({ customerId }: { customerId: string }) {
   const [category, setCategory] = useState('Carpenter');
-  if (customerId !== '612c54')
+  if (customerId !== 'demo-customer-001')
     return (
       <EmptyState
         title="No service fixtures"

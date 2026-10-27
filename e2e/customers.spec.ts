@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-const profile = '/customers/612c54';
+const profile = '/customers/demo-customer-001';
 const screens = [
   ['/customers', null],
   [profile, 'User Details'],
@@ -36,7 +36,7 @@ for (const viewport of viewports) {
       if (tab) {
         await expect(
           page.getByRole('heading', {
-            name: 'Tokunbo Ajibade Williams',
+            name: 'Demo Customer One',
             exact: true,
           }),
         ).toBeVisible();
@@ -48,7 +48,7 @@ for (const viewport of viewports) {
       }
       if (tab === 'Services')
         await expect(
-          page.getByRole('heading', { name: 'Adeolu Carpentry & Sons' }),
+          page.getByRole('heading', { name: 'Demo Woodworks Studio' }),
         ).toBeVisible();
       else
         await expect(page.getByRole('table')).toHaveCount(
@@ -96,13 +96,13 @@ test('customer search, filters, pagination, and empty results use URL state', as
     page.getByRole('table').getByText('Sample Customer Ten'),
   ).toBeVisible();
   const search = page.getByRole('textbox', { name: 'Search customer count' });
-  await search.fill('Tokunbo Williams');
+  await search.fill('Demo Customer One');
   await expect(
-    page.getByRole('table').getByText('Tokunbo Williams', { exact: true }),
+    page.getByRole('table').getByText('Demo Customer One', { exact: true }),
   ).toBeVisible();
   await expect(page.getByRole('table').locator('tbody tr')).toHaveCount(1);
   await page.reload();
-  await expect(search).toHaveValue('Tokunbo Williams');
+  await expect(search).toHaveValue('Demo Customer One');
   await search.fill('');
   await page.getByRole('button', { name: 'Toggle status filter' }).click();
   await page.getByLabel('Filter by status').selectOption('Suspended');
@@ -125,11 +125,11 @@ test('view links retain the real selected customer ID and do not reuse another p
 }) => {
   await page.goto('/customers');
   await page
-    .getByRole('link', { name: 'View Emma Thompson', exact: true })
+    .getByRole('link', { name: 'View Demo Customer Three', exact: true })
     .click();
-  await expect(page).toHaveURL('/customers/raisychen');
+  await expect(page).toHaveURL('/customers/demo-user-003');
   await expect(
-    page.getByRole('heading', { name: 'Emma Thompson', exact: true }),
+    page.getByRole('heading', { name: 'Demo Customer Three', exact: true }),
   ).toBeVisible();
   await expect(
     page.getByText('Not provided', { exact: true }).first(),
@@ -138,7 +138,7 @@ test('view links retain the real selected customer ID and do not reuse another p
     .getByRole('main', { name: 'Administration workspace' })
     .getByRole('link', { name: 'Jobs', exact: true })
     .click();
-  await expect(page).toHaveURL('/customers/raisychen/jobs');
+  await expect(page).toHaveURL('/customers/demo-user-003/jobs');
   await expect(
     page.getByText('No records match your search or filters.'),
   ).toBeVisible();
@@ -185,7 +185,7 @@ test('customer action disclosure closes with Escape and returns keyboard focus',
 }) => {
   await page.goto('/customers');
   const summary = page.locator(
-    'summary[aria-label="Actions for Tokunbo Ajibade Williams"]',
+    'summary[aria-label="Actions for Demo Customer One"]',
   );
   await summary.click();
   await expect(
