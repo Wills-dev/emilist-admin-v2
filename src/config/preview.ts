@@ -1,9 +1,7 @@
-// Static UI preview only: this policy never establishes an authenticated session.
+// Static presentation preview never establishes a session and cannot enable production access.
 export function isDashboardPreviewEnabled(
   environment: string | undefined,
   flag: string | undefined,
 ): boolean {
-  if (environment === 'production')
-    return flag === undefined || flag === 'true';
   return environment === 'development' && flag === 'true';
 }

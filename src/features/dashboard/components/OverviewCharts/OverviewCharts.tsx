@@ -16,11 +16,18 @@ const Revenue = dynamic(
     ),
   { loading: () => <Skeleton className="h-72 rounded-lg" />, ssr: false },
 );
-export function OverviewCharts() {
+export function OverviewCharts({ jobTotal }: { jobTotal?: number }) {
   return (
     <div className="overview-stagger grid min-w-0 gap-4 md:grid-cols-2">
       <Donut data={OVERVIEW_FIXTURES.transactions} kind="transactions" />
-      <Donut data={OVERVIEW_FIXTURES.jobs} kind="jobs" />
+      <Donut
+        data={
+          jobTotal === undefined
+            ? OVERVIEW_FIXTURES.jobs
+            : { ...OVERVIEW_FIXTURES.jobs, total: jobTotal }
+        }
+        kind="jobs"
+      />
       <Donut data={OVERVIEW_FIXTURES.customers} kind="customers" />
       <Revenue />
     </div>

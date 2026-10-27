@@ -25,13 +25,13 @@ const primaryItems = [
   { label: 'Customers', icon: UsersRound, href: ROUTES.customers },
   { label: 'Jobs', icon: NotebookText, href: ROUTES.jobs },
   { label: 'Materials', icon: HandCoins, href: ROUTES.materials },
-  { label: 'Payments', icon: Wallet },
-  { label: 'Support', icon: MessageSquare },
+  { label: 'Payments', icon: Wallet, href: ROUTES.payments },
+  { label: 'Support', icon: MessageSquare, href: ROUTES.support },
 ];
 const secondaryItems = [
-  { label: 'Reports', icon: Files },
+  { label: 'Reports', icon: Files, href: ROUTES.reports },
   { label: 'Internal Tickets', icon: CircleHelp },
-  { label: 'Settings', icon: Settings },
+  { label: 'Settings', icon: Settings, href: ROUTES.settings },
 ];
 const itemClass =
   'flex w-full items-center gap-3 rounded-md px-3 py-1.5 text-left text-sm transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-emerald-600 motion-reduce:transition-none';
@@ -81,20 +81,38 @@ export function DashboardSidebar({ profile }: { profile: DashboardProfile }) {
           aria-label="Workspace tools"
           className="space-y-3 border-t border-[#f0f2f0] pt-4"
         >
-          {secondaryItems.map(({ label, icon: Icon }) => (
-            <button
-              key={label}
-              disabled
-              title="This section is not connected"
-              className={cn(
-                itemClass,
-                'cursor-not-allowed bg-[#f8f9f8] text-[#343b36]',
-              )}
-            >
-              <Icon className="size-4" strokeWidth={1.5} />
-              {label}
-            </button>
-          ))}
+          {secondaryItems.map(({ label, icon: Icon, ...item }) =>
+            item.href ? (
+              <Link
+                key={label}
+                href={item.href}
+                aria-current={isActive(item.href) ? 'page' : undefined}
+                onClick={() => setOpen(false)}
+                className={cn(
+                  itemClass,
+                  isActive(item.href)
+                    ? 'bg-[#edfdf5] text-[#00a952]'
+                    : 'bg-[#f8f9f8] text-[#343b36] hover:bg-emerald-50',
+                )}
+              >
+                <Icon className="size-4" strokeWidth={1.5} />
+                {label}
+              </Link>
+            ) : (
+              <button
+                key={label}
+                disabled
+                title="This section is not connected"
+                className={cn(
+                  itemClass,
+                  'cursor-not-allowed bg-[#f8f9f8] text-[#343b36]',
+                )}
+              >
+                <Icon className="size-4" strokeWidth={1.5} />
+                {label}
+              </button>
+            ),
+          )}
           <Link
             href={ROUTES.login}
             onClick={() => setOpen(false)}

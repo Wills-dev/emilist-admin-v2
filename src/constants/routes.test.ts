@@ -29,3 +29,19 @@ it('centralizes management section paths', () => {
   expect(ROUTES.materials).toBe('/materials');
   expect(ROUTES.materialOrders).toBe('/materials/orders');
 });
+
+it('preserves centralized administrative operations routes', () => {
+  expect([
+    ROUTES.payments,
+    ROUTES.support,
+    ROUTES.reports,
+    ROUTES.settings,
+    ROUTES.settingsPermissions,
+  ]).toEqual([
+    '/payments',
+    '/support',
+    '/reports',
+    '/settings',
+    '/settings/permissions',
+  ]);
+});

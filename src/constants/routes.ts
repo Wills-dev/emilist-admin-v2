@@ -14,6 +14,11 @@ export const ROUTES = {
   jobs: '/jobs',
   materials: '/materials',
   materialOrders: '/materials/orders',
+  payments: '/payments',
+  support: '/support',
+  reports: '/reports',
+  settings: '/settings',
+  settingsPermissions: '/settings/permissions',
   forbidden: '/forbidden',
   unauthorized: '/unauthorized',
 } as const;

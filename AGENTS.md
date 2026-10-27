@@ -11,7 +11,7 @@ Use Node.js 24 and npm. Keep exact dependency versions and `package-lock.json`; 
 - Use Next.js App Router, the `src/` structure, `@/*` imports, and strict TypeScript.
 - Keep route files thin: compose feature screens, templates, and layouts.
 - Prefer Server Components. Add client boundaries only for interaction, browser APIs, or client providers; preserve existing server/client boundaries.
-- Keep business domains in `features/<domain>`. Feature components, services, hooks, schemas, and types belong to their domain. Do not import unrelated features' implementation details.
+- Keep business domains in `features/<domain>`. Feature components, services, hooks, schemas, and types belong to their domain. Do not import unrelated features' implementation details. Reports may compose the dashboard feature's public read-only analytics export; chart implementation details and fixtures remain owned by dashboard.
 - Keep shared infrastructure in `lib/`, environment configuration in `config/`, and application providers in `providers/`.
 - API functions belong in feature services, TanStack Query logic in dedicated feature hooks, and presentation logic in components. Never call Axios from presentation components.
 - Avoid circular dependencies, large global collections of domain logic, and unnecessary abstraction. Favor composition and clear TypeScript contracts.
@@ -71,7 +71,7 @@ Validate public settings and document environment variables in `.env.example`. K
 
 ## Authentication and authorization
 
-The dashboard has no connected protected data. Static UI preview access is enabled by default in production and requires DASHBOARD_UI_PREVIEW=true in development. Set DASHBOARD_UI_PREVIEW=false to deny preview access. Never use the preview gate to serve real protected data/actions or establish a session. Real protected functionality must require server-validated authentication, including in production. Keep static presentation fixtures separate from API contracts and clearly labelled. The root entry point is `/login`; authenticated redirects must depend on a verified server session. The server-only session adapter interface and permission helpers are integration infrastructure, not a completed authentication system.
+The dashboard has no connected protected data. Static UI preview access requires NODE_ENV=development and DASHBOARD_UI_PREVIEW=true. Production must deny dashboard access regardless of the preview flag until real server-validated authentication is integrated. Never use the preview gate to serve real protected data/actions or establish a session. Real protected functionality must require server-validated authentication, including in production. Keep static presentation fixtures separate from API contracts and clearly labelled. The root entry point is `/login`; authenticated redirects must depend on a verified server session. The server-only session adapter interface and permission helpers are integration infrastructure, not a completed authentication system.
 
 Before adding protected functionality, implement the confirmed session adapter and enforce authentication in the dashboard server layout and authorization close to each server data access/action. Backend APIs must independently enforce permissions; hidden controls and route interception are supplemental only.
 

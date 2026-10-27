@@ -2,7 +2,7 @@
 
 Administration frontend for the Emilist services marketplace, built with Next.js App Router and TypeScript.
 
-The application currently provides a responsive dashboard shell, desktop and mobile navigation, loading skeletons, empty states, error recovery, and access-state pages. Shared API, query, and authorization utilities are available, but live marketplace integrations and production authentication are not connected. The deployed application exposes a static dashboard UI preview by default; it does not authenticate users or enable backend actions. Preview access can be disabled with `DASHBOARD_UI_PREVIEW=false`.
+The application currently provides a responsive dashboard shell, desktop and mobile navigation, loading skeletons, empty states, error recovery, and access-state pages. Shared API, query, and authorization utilities are available, but live marketplace integrations and production authentication are not connected. Static dashboard UI preview access is restricted to development. Production redirects dashboard routes to sign-in until real server-validated authentication is integrated.
 
 ## Technology stack
 
@@ -123,7 +123,7 @@ Backend-dependent actions remain disabled even when local fields are valid. The 
 
 ## Overview UI preview
 
-Production deployments enable the static UI preview by default. Clicking Sign In opens `/dashboard` without requiring credentials; it sends no credentials and creates no tokens or session. Set the server-only `DASHBOARD_UI_PREVIEW=false` to disable access and redirect dashboard routes to `/login`. In development, set `DASHBOARD_UI_PREVIEW=true` in `.env.local` and run `npm run dev`. Explicit flag values must be exactly `true` or `false`. Preview access must never grant access to protected backend data or actions. Rebuild and redeploy after changing deployment configuration.
+Set `DASHBOARD_UI_PREVIEW=true` in `.env.local` and run `npm run dev` to view static dashboard fixtures. The server-only flag requires both development mode and an exact `true` value. In development preview, Sign In navigates to `/dashboard` without sending credentials or creating tokens or a session. Production always denies preview access, including when the flag is `true`. Protected backend data and actions require real server-validated authentication.
 
 The Overview includes quick search, operational metrics, transaction/job/customer donut charts, a revenue trend, quick actions, and trade totals. `src/features/dashboard/fixtures/overviewFixtures.ts` owns the static presentation values. These are not API responses or live records. The job category sum differs from the supplied center total by 10; the visual reference values are retained. Intermediate revenue trend points are approximate presentation values. Search reports that its service is unavailable; date selection updates only the control, not the fixtures. Unimplemented destinations and administrative actions are disabled. “Sign out” leaves the preview for sign-in without claiming to revoke a session.
 
@@ -138,6 +138,16 @@ The responsive shell retains a fixed header and an independently scrolling conte
 These screens use typed presentation fixtures in `features/jobs` and `features/materials`, with nine reference records and one explicitly labelled additional sample per collection. Metric totals are design values, not counts of downloaded records. Product image assets are not available; labelled image placeholders are shown. Record details and administrative mutations remain disabled pending supplied detail designs and backend contracts. No backend services or endpoints are implemented for these modules.
 
 Shared `DataTable`, `TableToolbar`, `SummaryMetrics`, `Pagination`, `RecordActions`, `RecordStatus`, and `ManagementSkeleton` components provide the common presentation. `hooks/useFixtureTable` owns local URL state; feature hooks select and filter domain fixtures. Confirmed API services and TanStack Query hooks will belong to each feature when integration contracts are available. Protected backend data must never use the static preview access policy.
+
+## Administrative operations
+
+Development previews include `/payments`, `/support`, `/reports`, `/settings`, and `/settings/permissions`. Payments and Support use domain-owned typed fixtures, local URL-backed search, filters, pagination, and disabled backend operations. Ticket elapsed times are fixed samples, not live countdowns or operational SLAs.
+
+Reports composes the dashboard feature's public read-only analytics export, reusing its existing charts and summary components. Its supplied job total is 65,162; the Overview fixture remains unchanged. Its URL-backed date-range selector changes the displayed reporting period only; it does not retrieve or recalculate analytics.
+
+Settings has route-aware Platform Configuration and User Permissions tabs. Platform fields support validated local drafts and cancellation; saving is unavailable. Subscription cards reuse the shared plan carousel. Spotlight candidates permit one local selection per category, with search and category filters; publishing is unavailable. The roles table uses typed presentation permission keys and local search, status filters, and pagination. These role fixtures never grant authorization, and invitations and role mutations remain unavailable.
+
+These modules define no backend services, API responses, or successful mutations. Integrate only supplied backend contracts in feature-owned services and query hooks, with server authentication and backend authorization before exposing protected data or operations.
 
 ## Customer Management UI
 
@@ -177,7 +187,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-Playwright starts its own production server on `127.0.0.1:4317`; keep that port available. Its desktop and mobile Chromium projects cover login routing, denied dashboard access, responsive overflow, authentication panel scrolling, keyboard focus, and not-found recovery. Authentication tests also cover all nine UI routes at 320, 375, 425, 768, 1024, and 1440px, short viewports at 768×600 and 1440×700, local form interactions, and unavailable backend actions. `npm run check` builds the application but does not run Playwright. Customer browser tests cover all nine views at the same six widths and short heights, URL-state controls, profile routes, galleries, plan browsing, keyboard disclosures, and production access denial. Browser tests start production servers on ports 4317 (preview disabled) and 4318 (preview enabled), verifying both denied access and deployed preview navigation. Keep both ports available. The test-only PLAYWRIGHT_PREVIEW flag isolates the development test server in .next-playwright so it can coexist with a normal development session.
+Playwright starts its own production server on `127.0.0.1:4317`; keep that port available. Its desktop and mobile Chromium projects cover login routing, denied dashboard access, responsive overflow, authentication panel scrolling, keyboard focus, and not-found recovery. Authentication tests also cover all nine UI routes at 320, 375, 425, 768, 1024, and 1440px, short viewports at 768×600 and 1440×700, local form interactions, and unavailable backend actions. `npm run check` builds the application but does not run Playwright. Customer browser tests cover all nine views at the same six widths and short heights, URL-state controls, profile routes, galleries, plan browsing, keyboard disclosures, and production access denial. Browser tests start a production server on port 4317 with the preview flag deliberately set to true to verify access remains denied, and a development preview server on port 4318. Keep both ports available. The test-only PLAYWRIGHT_PREVIEW flag isolates the development test server in .next-playwright so it can coexist with a normal development session.
 
 ## Build and deployment
 

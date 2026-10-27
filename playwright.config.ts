@@ -14,6 +14,7 @@ export default defineConfig({
         '**/overview.spec.ts',
         '**/customers.spec.ts',
         '**/management.spec.ts',
+        '**/operations.spec.ts',
       ],
       use: { ...devices['Desktop Chrome'] },
     },
@@ -23,15 +24,22 @@ export default defineConfig({
         '**/overview.spec.ts',
         '**/customers.spec.ts',
         '**/management.spec.ts',
+        '**/operations.spec.ts',
       ],
       use: { ...devices['Pixel 7'] },
     },
     {
       name: 'overview-preview',
+      // Serialize journeys against the shared development compiler/HMR server.
+      workers: 1,
+      expect: { timeout: 15_000 },
+      // Development compilation and routed refresh checks need more time than production journeys.
+      timeout: 90_000,
       testMatch: [
         '**/overview.spec.ts',
         '**/customers.spec.ts',
         '**/management.spec.ts',
+        '**/operations.spec.ts',
       ],
       use: { ...devices['Desktop Chrome'], baseURL: 'http://127.0.0.1:4318' },
     },
@@ -41,13 +49,13 @@ export default defineConfig({
       command: 'npm run start -- --hostname 127.0.0.1 --port 4317',
       url: 'http://127.0.0.1:4317',
       reuseExistingServer: false,
-      env: { DASHBOARD_UI_PREVIEW: 'false' },
+      env: { DASHBOARD_UI_PREVIEW: 'true' },
     },
     {
-      command: 'npm run start -- --hostname 127.0.0.1 --port 4318',
+      command: 'npm run dev -- --webpack --hostname 127.0.0.1 --port 4318',
       url: 'http://127.0.0.1:4318',
       reuseExistingServer: false,
-      env: { DASHBOARD_UI_PREVIEW: 'true' },
+      env: { DASHBOARD_UI_PREVIEW: 'true', PLAYWRIGHT_PREVIEW: 'true' },
     },
   ],
 });
