@@ -1,14 +1,15 @@
+import { ROUTES } from '@/constants/routes';
 import Link from 'next/link';
 import { cn } from '@/lib/utils/cn';
 
 const invitationSteps = [
-  { label: 'Your details', href: '/accept-invite' },
-  { label: 'Password', href: '/accept-invite/password' },
-  { label: 'Authenticator', href: '/accept-invite/authenticator' },
+  { label: 'Your details', href: ROUTES.acceptInvite },
+  { label: 'Password', href: ROUTES.invitePassword },
+  { label: 'Authenticator', href: ROUTES.inviteAuthenticator },
 ];
 const resetSteps = [
-  { label: 'Verify code', href: '/reset-password/verify' },
-  { label: 'Create new password', href: '/reset-password' },
+  { label: 'Verify code', href: ROUTES.resetVerify },
+  { label: 'Create new password', href: ROUTES.resetPassword },
 ];
 export function AuthSteps({
   current,

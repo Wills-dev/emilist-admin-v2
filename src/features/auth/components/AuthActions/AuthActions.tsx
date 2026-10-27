@@ -7,11 +7,13 @@ export function AuthActions({
   backLabel = 'Back to Sign In',
   submitLabel,
   unavailable,
+  disabled = true,
 }: {
   backHref?: string;
   backLabel?: string;
   submitLabel?: string;
   unavailable?: string;
+  disabled?: boolean;
 }) {
   return (
     <div className="mt-7 border-t border-neutral-100 pt-6">
@@ -31,7 +33,7 @@ export function AuthActions({
         {submitLabel && (
           <Button
             type="submit"
-            disabled
+            disabled={disabled}
             aria-describedby="auth-unavailable"
             className="flex-1 bg-[#109f52] text-xs text-white disabled:opacity-50"
           >

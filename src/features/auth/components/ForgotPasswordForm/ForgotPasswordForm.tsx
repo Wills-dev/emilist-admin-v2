@@ -1,4 +1,5 @@
 'use client';
+import { ROUTES } from '@/constants/routes';
 import { useForm } from 'react-hook-form';
 import { Input } from '@/components/ui/Input/Input';
 import { AuthField } from '@/features/auth/components/AuthField/AuthField';
@@ -35,7 +36,7 @@ export function ForgotPasswordForm() {
         />
       </AuthField>
       <AuthActions
-        backHref="/login"
+        backHref={ROUTES.login}
         submitLabel="Send Reset Link"
         unavailable="Reset email delivery is unavailable until the recovery service is connected."
       />

@@ -10,6 +10,7 @@ export default defineConfig([
   { rules: { '@typescript-eslint/no-explicit-any': 'error' } },
   globalIgnores([
     '.next/**',
+    '.next-playwright/**',
     'out/**',
     'coverage/**',
     'playwright-report/**',

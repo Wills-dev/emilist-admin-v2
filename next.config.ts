@@ -2,6 +2,13 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  devIndicators: process.env.PLAYWRIGHT_PREVIEW === 'true' ? false : undefined,
+  // Keep the browser-test dev server separate from a running development session.
+  distDir:
+    process.env.NODE_ENV === 'development' &&
+    process.env.PLAYWRIGHT_PREVIEW === 'true'
+      ? '.next-playwright'
+      : '.next',
   async headers() {
     return [
       {

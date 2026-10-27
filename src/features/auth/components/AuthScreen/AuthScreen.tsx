@@ -1,3 +1,4 @@
+import { ROUTES } from '@/constants/routes';
 import { AuthLayout } from '@/features/auth/components/AuthLayout/AuthLayout';
 import { AuthTabs } from '@/features/auth/components/AuthTabs/AuthTabs';
 import { AuthFormHeader } from '@/features/auth/components/AuthFormHeader/AuthFormHeader';
@@ -76,7 +77,13 @@ const screens = {
 >;
 export type AuthScreenName = keyof typeof screens;
 
-export function AuthScreen({ screen }: { screen: AuthScreenName }) {
+export function AuthScreen({
+  screen,
+  previewEnabled = false,
+}: {
+  screen: AuthScreenName;
+  previewEnabled?: boolean;
+}) {
   const config = screens[screen];
   const invitation = config.variant === 'signup';
   return (
@@ -92,7 +99,7 @@ export function AuthScreen({ screen }: { screen: AuthScreenName }) {
       {(screen === 'resetVerify' || screen === 'resetPassword') && (
         <AuthSteps reset current={screen === 'resetVerify' ? 1 : 2} />
       )}
-      {screen === 'login' && <LoginForm />}
+      {screen === 'login' && <LoginForm previewEnabled={previewEnabled} />}
       {screen === 'loginVerify' && <VerificationForm />}
       {screen === 'invite' && (
         <>
@@ -125,7 +132,7 @@ export function AuthScreen({ screen }: { screen: AuthScreenName }) {
             </p>
           </div>
           <AuthActions
-            backHref="/login"
+            backHref={ROUTES.login}
             unavailable="Sending and resending reset links are unavailable."
           />
         </>

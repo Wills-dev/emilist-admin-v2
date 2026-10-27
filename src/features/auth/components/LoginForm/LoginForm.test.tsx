@@ -1,6 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { expect, it } from 'vitest';
+import { expect, it, vi } from 'vitest';
+const { push } = vi.hoisted(() => ({ push: vi.fn() }));
+vi.mock('next/navigation', () => ({ useRouter: () => ({ push }) }));
 import { LoginForm } from './LoginForm';
 
 it('validates credentials locally, toggles visibility, and keeps sign-in unavailable', async () => {
@@ -27,4 +29,14 @@ it('validates credentials locally, toggles visibility, and keeps sign-in unavail
   expect(
     screen.getByRole('link', { name: 'Forgot Password?' }),
   ).toHaveAttribute('href', '/forgot-password');
+});
+
+it('opens the enabled UI preview immediately without requiring credentials', async () => {
+  const user = userEvent.setup();
+  render(<LoginForm previewEnabled />);
+  const button = screen.getByRole('button', { name: 'Sign In' });
+  expect(button).toBeEnabled();
+  await user.click(button);
+  expect(push).toHaveBeenCalledWith('/dashboard');
+  expect(localStorage.getItem('session')).toBeNull();
 });

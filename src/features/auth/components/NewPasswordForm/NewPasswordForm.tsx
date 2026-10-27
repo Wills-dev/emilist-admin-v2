@@ -1,4 +1,5 @@
 'use client';
+import { ROUTES } from '@/constants/routes';
 import { useForm, useWatch } from 'react-hook-form';
 import { PasswordField } from '@/features/auth/components/PasswordField/PasswordField';
 import { PasswordRequirements } from '@/features/auth/components/PasswordRequirements/PasswordRequirements';
@@ -60,7 +61,7 @@ export function NewPasswordForm({ reset = false }: { reset?: boolean }) {
         </div>
       </div>
       <AuthActions
-        backHref={reset ? '/login' : '/accept-invite'}
+        backHref={reset ? ROUTES.login : ROUTES.acceptInvite}
         backLabel={reset ? 'Back to Sign In' : 'Back to Account Setup'}
         submitLabel={reset ? 'Update Password' : 'Create Password'}
         unavailable="Password changes are unavailable until account verification and the password service are connected."
