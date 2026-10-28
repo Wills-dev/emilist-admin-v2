@@ -1,14 +1,5 @@
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { defineConfig, devices } from '@playwright/test';
 
-const identity: { env: Record<string, string>; token: string } = JSON.parse(
-  readFileSync('.test-deployment/identity.json', 'utf8'),
-);
-const demoEnv = {
-  ...identity.env,
-  NODE_OPTIONS: `--import ${resolve('e2e/helpers/mockVercel.mjs')}`,
-};
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
@@ -54,33 +45,19 @@ export default defineConfig({
       ],
       use: {
         ...devices['Desktop Chrome'],
-        baseURL: 'http://127.0.0.1:4318',
-        extraHTTPHeaders: { 'x-vercel-oidc-token': identity.token },
+        baseURL: 'http://127.0.0.1:4317',
       },
     },
   ],
-  webServer: [
-    {
-      command: 'npm run start -- --hostname 127.0.0.1 --port 4317',
-      url: 'http://127.0.0.1:4317',
-      reuseExistingServer: false,
-      env: { DASHBOARD_UI_PREVIEW: 'true' },
+  webServer: {
+    command: 'npm run start -- --hostname 127.0.0.1 --port 4317',
+    url: 'http://127.0.0.1:4317',
+    reuseExistingServer: false,
+    // Legacy deployment settings must not prevent public fixture access.
+    env: {
+      DASHBOARD_UI_PREVIEW: 'false',
+      APP_DEPLOYMENT_MODE: 'production',
+      VERCEL: '1',
     },
-    {
-      command: 'npm run start:demo -- --hostname 127.0.0.1 --port 4318',
-      url: 'http://127.0.0.1:4318',
-      reuseExistingServer: false,
-      env: demoEnv,
-    },
-    {
-      command: 'npm run start:demo -- --hostname 127.0.0.1 --port 4319',
-      url: 'http://127.0.0.1:4319',
-      reuseExistingServer: false,
-      env: {
-        ...demoEnv,
-        VERCEL_PROJECT_ID: identity.env.ADMIN_VERCEL_PROJECT_ID!,
-        APP_DEPLOYMENT_MODE: 'demo',
-      },
-    },
-  ],
+  },
 });

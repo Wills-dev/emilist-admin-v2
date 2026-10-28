@@ -2,7 +2,7 @@
 
 Administration frontend for the Emilist services marketplace, built with Next.js App Router and TypeScript.
 
-The application currently provides a responsive dashboard shell, desktop and mobile navigation, loading skeletons, empty states, error recovery, and access-state pages. Shared API, query, and authorization utilities are available, but live marketplace integrations and production authentication are not connected. Local dashboard UI preview access is restricted to development. The real production project redirects unauthenticated dashboard routes to sign-in until server-validated authentication is integrated. A separately built, Vercel-identity-bound demo can expose only synthetic fixtures.
+The application currently provides a responsive dashboard shell, desktop and mobile navigation, loading skeletons, empty states, error recovery, and access-state pages. Shared API, query, and authorization utilities are available, but live marketplace integrations and production authentication are not connected. Every deployment exposes only a public synthetic fixture preview; private data and backend mutations are unavailable.
 
 ## Technology stack
 
@@ -98,7 +98,7 @@ Use TanStack Query for remote data, Zustand for shared UI state, URL parameters 
 
 ## Authentication and authorization
 
-`src/lib/auth/session.ts` defines a server-only `SessionAdapter` interface and a `requirePermission` helper. `src/lib/auth/authorization.ts` provides an internal `AdminSession` model and permission checks that deny absent, invalid, or expired sessions. These utilities are not connected to a session backend. The dashboard server layout permits only static UI preview access under the preview policy. This does not establish a session. Real protected data and actions must remain unavailable until a verified session adapter is implemented. Once connected, authenticated visitors to `/` or `/login` should be redirected to `/dashboard` using a verified server session.
+`src/lib/auth/session.ts` defines a server-only `SessionAdapter` interface and a `requirePermission` helper. `src/lib/auth/authorization.ts` provides an internal `AdminSession` model and permission checks that deny absent, invalid, or expired sessions. These utilities are not connected to a session backend. The dashboard server layout exposes public synthetic UI fixtures. This does not establish a session. Real protected data and actions must remain unavailable until a verified session adapter is implemented. Once connected, authenticated visitors to `/` or `/login` should be redirected to `/dashboard` using a verified server session.
 
 The `/unauthorized` and `/forbidden` routes provide presentation states; they do not enforce HTTP authorization. Authentication forms are available, but backend login, logout, invitation verification, enrollment, email delivery, and password changes are not connected. Setting the API base URL alone does not establish authentication.
 
@@ -121,9 +121,9 @@ Forms support local email/password validation, password visibility, live passwor
 
 Backend-dependent actions remain disabled even when local fields are valid. The static UI preview described below permits only navigation to static UI fixtures. The delivery-status view does not claim an email was sent. Invitation details, QR enrollment, and secret-key values remain unavailable until verified backend data exists. No form completion establishes a session; the preview Sign In button only navigates to static dashboard fixtures. Password requirements are UI validation rules and must be reconciled with the backend policy during integration.
 
-## Local UI preview
+## Public UI preview
 
-Set `DASHBOARD_UI_PREVIEW=true` in `.env.local` and run `npm run dev`. This local-only preview does not authenticate users or create a session. It is ignored in normal production artifacts and must not be configured on Vercel. All fixtures use fictional identities, non-deliverable `example.invalid` emails, non-dialable phone labels, and fictional street addresses. Synthetic amounts, dates, and aggregate metrics are presentation values only.
+Run `npm run dev` locally or `npm run build` and `npm start` for a production build. All dashboard pages are accessible without authentication or deployment configuration. Sign In opens the Overview and creates no session. Fixtures use fictional identities, non-deliverable `example.invalid` emails, non-dialable phone labels, and fictional addresses.
 
 The Overview includes quick search, operational metrics, transaction/job/customer donut charts, a revenue trend, quick actions, and trade totals. `src/features/dashboard/fixtures/overviewFixtures.ts` owns the static presentation values. These are not API responses or live records. The job category sum differs from the supplied center total by 10; the visual reference values are retained. Intermediate revenue trend points are approximate presentation values. Search reports that its service is unavailable; date selection updates only the control, not the fixtures. Unimplemented destinations and administrative actions are disabled. “Sign out” leaves the preview for sign-in without claiming to revoke a session.
 
@@ -163,21 +163,21 @@ Create/edit, messaging, password resets, suspension, wallet changes, and unavail
 
 ## Available scripts
 
-| Command                | Purpose                                                               |
-| ---------------------- | --------------------------------------------------------------------- |
-| `npm run dev`          | Start the development server                                          |
-| `npm run typecheck`    | Generate Next.js route types and check TypeScript                     |
-| `npm run lint`         | Run ESLint with zero warnings allowed                                 |
-| `npm run format`       | Format the repository with Prettier                                   |
-| `npm run format:check` | Check formatting                                                      |
-| `npm test`             | Run unit and component tests                                          |
-| `npm run test:watch`   | Run Vitest interactively                                              |
-| `npm run test:e2e`     | Run Playwright against a production server                            |
-| `npm run build`        | Create the production build                                           |
-| `npm run build:demo`   | Build the dedicated demo; requires verified Vercel demo configuration |
-| `npm run start:demo`   | Serve a demo artifact with its signed runtime identity checks         |
-| `npm start`            | Serve the production build                                            |
-| `npm run check`        | Run types, lint, formatting, unit tests, and build                    |
+| Command                | Purpose                                            |
+| ---------------------- | -------------------------------------------------- |
+| `npm run dev`          | Start the development server                       |
+| `npm run typecheck`    | Generate Next.js route types and check TypeScript  |
+| `npm run lint`         | Run ESLint with zero warnings allowed              |
+| `npm run format`       | Format the repository with Prettier                |
+| `npm run format:check` | Check formatting                                   |
+| `npm test`             | Run unit and component tests                       |
+| `npm run test:watch`   | Run Vitest interactively                           |
+| `npm run test:e2e`     | Run Playwright against a production server         |
+| `npm run build`        | Create the production build                        |
+| `npm run build:demo`   | Alias for the standard public fixture build        |
+| `npm run start:demo`   | Alias for the standard server                      |
+| `npm start`            | Serve the production build                         |
+| `npm run check`        | Run types, lint, formatting, unit tests, and build |
 
 ## Testing
 
@@ -189,7 +189,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-Playwright starts its own production server on `127.0.0.1:4317`; keep that port available. Its desktop and mobile Chromium projects cover login routing, denied dashboard access, responsive overflow, authentication panel scrolling, keyboard focus, and not-found recovery. Authentication tests also cover all nine UI routes at 320, 375, 425, 768, 1024, and 1440px, short viewports at 768×600 and 1440×700, local form interactions, and unavailable backend actions. `npm run check` builds the application but does not run Playwright. Customer browser tests cover all nine views at the same six widths and short heights, URL-state controls, profile routes, galleries, plan browsing, keyboard disclosures, and production access denial. Browser tests build a separate production-mode demo artifact with temporary signing keys and a test-process-only mock of Vercel's fixed JWKS transport. The application has no test-key or custom-JWKS configuration. Tests run the normal production server on port 4317, the verified demo on 4318, and a copied demo artifact with the wrong project identity on 4319. All three ports must be available. A Vercel-signed token, demo configuration, and matching artifact binding are all required for deployed demo access. The temporary test keys and demo build output are ignored by Git. The test wrapper uses Webpack for deterministic local compilation.
+Playwright starts a production server on `127.0.0.1:4317`. Tests cover public Sign In navigation and direct access, all dashboard sections, responsive layouts, form validation, keyboard navigation, reduced motion, and blocked administrative requests. Keep that port available. `npm run check` does not run Playwright.
 
 ## Build and deployment
 
@@ -203,35 +203,8 @@ Set public environment values before building. `npm start` serves the generated 
 
 `next.config.ts` disables the framework identification header and configures MIME-sniffing protection, frame denial, referrer policy, and restrictions on camera, microphone, and geolocation. These headers supplement application and backend authorization. Connect and enforce production authentication before exposing protected administrative data or actions.
 
-## Isolated Vercel deployments
+## Vercel deployment
 
-Use two separate Vercel projects connected to this repository, with these exact project names. No shared deployment artifacts, administrative API credentials, account databases, or team-level API variables may be inherited by the demo project.
+Use the Next.js framework preset, Node.js 24.x, install command `npm ci`, build command `npm run build`, and the default output directory. No project/team IDs, hostname allowlists, OIDC configuration, or preview flags are required. Existing values for those retired settings are ignored and may be removed from Vercel. `npm run build:demo` and `npm run start:demo` remain aliases for the normal commands.
 
-| Setting                                                          | `emilist-admin-demo`                       | `emilist-admin`                                 |
-| ---------------------------------------------------------------- | ------------------------------------------ | ----------------------------------------------- |
-| Framework                                                        | Next.js                                    | Next.js                                         |
-| Install command                                                  | `npm ci`                                   | `npm ci`                                        |
-| Build command                                                    | `npm run build:demo`                       | `npm run build`                                 |
-| Output directory                                                 | Default Next.js (`.next`)                  | Default Next.js (`.next`)                       |
-| Node.js                                                          | 24.x                                       | 24.x                                            |
-| `APP_DEPLOYMENT_MODE`                                            | `demo`                                     | `production`                                    |
-| `DEMO_VERCEL_PROJECT_ID`                                         | Actual demo project ID                     | Same demo project ID                            |
-| `ADMIN_VERCEL_PROJECT_ID`                                        | Actual real production project ID          | Same real production project ID                 |
-| `EMILIST_VERCEL_TEAM_ID`                                         | Actual owning team ID                      | Same owning team ID                             |
-| `EMILIST_VERCEL_TEAM_SLUG`                                       | Actual owning team slug                    | Same owning team slug                           |
-| `DEMO_ALLOWED_HOSTS`                                             | Approved demo hostnames, comma-separated   | Same approved demo hostname list                |
-| `ADMIN_ALLOWED_HOSTS`                                            | Real production hostnames, comma-separated | Same real production hostname list              |
-| `DASHBOARD_UI_PREVIEW`                                           | Unset or `false`                           | Unset or `false`                                |
-| `NEXT_PUBLIC_API_BASE_URL`, `ADMIN_API_BASE_URL`, `API_BASE_URL` | Unset                                      | Leave unset until confirmed backend integration |
-
-Hostnames must be disjoint and contain no schemes, paths, wildcards, or credentials. Include each intended Vercel/custom demo hostname explicitly; unlisted generated/branch URLs remain denied. Do not assign real production domains to the demo project.
-
-Set project-specific variables for every enabled Vercel Production/Preview environment. Enable **Automatically expose System Environment Variables** and **Secure backend access with OIDC federation**, using the **Team** issuer mode on both projects. Vercel supplies `VERCEL`, `VERCEL_ENV`, `VERCEL_PROJECT_ID`, the build-time `VERCEL_OIDC_TOKEN`, and the function request's `x-vercel-oidc-token` header. Never manually create or commit identity tokens, and do not override Vercel system variables. Custom Vercel target environments are not supported by this configuration; only Production and Preview are accepted.
-
-The allowlisted project/team IDs and hostnames are configuration, not authorization proof. Build and request-time checks cryptographically verify the token's signature, issuer, audience, subject, project ID/name, owning team, environment, and validity against Vercel's fixed JWKS endpoint. The expected project names are pinned to `emilist-admin-demo` and `emilist-admin`. No project IDs, deployment URLs, or secrets are hardcoded. The demo build records its verified non-secret identity binding in its compiled artifact; runtime flags cannot convert a normal artifact into a demo. Missing identities, wrong projects, conflicting mode, expired/forged tokens, API origins on demo, and reused artifacts from another project/environment fail closed. A build lacking valid required identity fails; an invalid runtime demo request is denied. Do not promote or copy prebuilt demo artifacts between projects or Vercel environments; rebuild in the destination's own project/environment instead. In particular, never use a local test demo artifact for deployment.
-
-On the dedicated demo only, Sign In opens Overview through the centralized route constant without reading credentials or creating an authenticated administrator. The persistent Demo Mode label identifies synthetic presentation data. Direct routes and refreshes use the same server-side identity check. Real production has no unauthenticated dashboard path, even with demo flags or a demo request token; backend authentication remains an integration requirement.
-
-Demo safety is enforced beyond buttons: the compiled API client rejects every administrative request before dispatch; the demo proxy rejects API/export paths and non-GET/HEAD requests, including server-action POSTs; CSP restricts browser connections to the demo origin and disables form submissions, frames, workers, and objects. Same-origin navigation and Next.js rendering remain available. Server deployment verification may fetch only Vercel's fixed public signing-key endpoint; there are no administrative services or server-side API calls. Future services must preserve the demo network deny policy, and the actual backend must independently require authentication/authorization and reject demo-origin credentials. Vercel configuration administrators remain a trusted operational boundary: this does not protect against someone changing source code or replacing the deployment's trust policy.
-
-See [Vercel system variables](https://vercel.com/docs/environment-variables/system-environment-variables), [OIDC token claims](https://vercel.com/docs/oidc/reference), and [OIDC at build/function runtime](https://vercel.com/docs/oidc). Test keys are generated only by `npm run test:e2e`; no application environment variable can switch the production verifier to those keys. `EMILIST_BUILD_TARGET` and the compiled `EMILIST_BOUND_*` values are internal build outputs, not Vercel settings to copy between projects. `EMILIST_OUTPUT_DIRECTORY=.next-demo` is used only by the local browser harness to keep test artifacts separate; do not set it on Vercel.
+All deployments expose the same public synthetic fixture dashboard. Sign In navigates to Overview without credentials, cookies, tokens, or an authenticated administrator session. Direct dashboard routes and refreshes work without deployment restrictions. The persistent Demo Mode badge identifies the interface as a demonstration. Administrative requests, server-action POSTs, APIs, and exports remain blocked; backend-dependent controls remain disabled. CSP restricts production browser connections to the frontend origin. Integrate real server authentication and backend authorization before enabling private records or administrative operations.

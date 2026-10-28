@@ -28,8 +28,7 @@ it('rejects absolute endpoint URLs before dispatch', async () => {
   expect(adapter).not.toHaveBeenCalled();
 });
 
-it('blocks administrative reads and writes in a demo artifact before the adapter runs', async () => {
-  vi.stubEnv('EMILIST_BUILD_TARGET', 'demo');
+it('blocks administrative reads and writes in every deployment before the adapter runs', async () => {
   vi.doMock('@/config/env', () => ({
     publicEnv: {
       apiBaseUrl: 'https://admin.example.invalid',

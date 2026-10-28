@@ -2,7 +2,6 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { ROUTES } from '@/constants/routes';
 
 export function proxy(request: NextRequest) {
-  if (process.env.EMILIST_BUILD_TARGET !== 'demo') return NextResponse.next();
   // Demo builds have no mutation transport, API routes, server actions or downloads.
   const path = request.nextUrl.pathname;
   const page =
@@ -21,10 +20,11 @@ export function proxy(request: NextRequest) {
           { status: 403 },
         )
       : NextResponse.next();
-  response.headers.set(
-    'Content-Security-Policy',
-    "default-src 'self'; connect-src 'self'; img-src 'self' data:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; frame-src 'none'; object-src 'none'; worker-src 'none'; form-action 'none'; base-uri 'self'",
-  );
+  if (process.env.NODE_ENV === 'production')
+    response.headers.set(
+      'Content-Security-Policy',
+      "default-src 'self'; connect-src 'self'; img-src 'self' data:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; frame-src 'none'; object-src 'none'; worker-src 'none'; form-action 'none'; base-uri 'self'",
+    );
   response.headers.set('Cache-Control', 'private, no-store');
   return response;
 }
