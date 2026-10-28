@@ -2,7 +2,7 @@
 
 Administration frontend for the Emilist services marketplace, built with Next.js App Router and TypeScript.
 
-The application currently provides a responsive dashboard shell, desktop and mobile navigation, loading skeletons, empty states, error recovery, and access-state pages. Shared API, query, and authorization utilities are available, but live marketplace integrations and production authentication are not connected. Static dashboard UI preview access is restricted to development. Production redirects dashboard routes to sign-in until real server-validated authentication is integrated.
+The application currently provides a responsive dashboard shell, desktop and mobile navigation, loading skeletons, empty states, error recovery, and access-state pages. Shared API, query, and authorization utilities are available, but live marketplace integrations and production authentication are not connected. Every deployment exposes only a public synthetic fixture preview; private data and backend mutations are unavailable.
 
 ## Technology stack
 
@@ -98,7 +98,7 @@ Use TanStack Query for remote data, Zustand for shared UI state, URL parameters 
 
 ## Authentication and authorization
 
-`src/lib/auth/session.ts` defines a server-only `SessionAdapter` interface and a `requirePermission` helper. `src/lib/auth/authorization.ts` provides an internal `AdminSession` model and permission checks that deny absent, invalid, or expired sessions. These utilities are not connected to a session backend. The dashboard server layout permits only static UI preview access under the preview policy. This does not establish a session. Real protected data and actions must remain unavailable until a verified session adapter is implemented. Once connected, authenticated visitors to `/` or `/login` should be redirected to `/dashboard` using a verified server session.
+`src/lib/auth/session.ts` defines a server-only `SessionAdapter` interface and a `requirePermission` helper. `src/lib/auth/authorization.ts` provides an internal `AdminSession` model and permission checks that deny absent, invalid, or expired sessions. These utilities are not connected to a session backend. The dashboard server layout exposes public synthetic UI fixtures. This does not establish a session. Real protected data and actions must remain unavailable until a verified session adapter is implemented. Once connected, authenticated visitors to `/` or `/login` should be redirected to `/dashboard` using a verified server session.
 
 The `/unauthorized` and `/forbidden` routes provide presentation states; they do not enforce HTTP authorization. Authentication forms are available, but backend login, logout, invitation verification, enrollment, email delivery, and password changes are not connected. Setting the API base URL alone does not establish authentication.
 
@@ -121,9 +121,9 @@ Forms support local email/password validation, password visibility, live passwor
 
 Backend-dependent actions remain disabled even when local fields are valid. The static UI preview described below permits only navigation to static UI fixtures. The delivery-status view does not claim an email was sent. Invitation details, QR enrollment, and secret-key values remain unavailable until verified backend data exists. No form completion establishes a session; the preview Sign In button only navigates to static dashboard fixtures. Password requirements are UI validation rules and must be reconciled with the backend policy during integration.
 
-## Overview UI preview
+## Public UI preview
 
-Set `DASHBOARD_UI_PREVIEW=true` in `.env.local` and run `npm run dev` to view static dashboard fixtures. The server-only flag requires both development mode and an exact `true` value. In development preview, Sign In navigates to `/dashboard` without sending credentials or creating tokens or a session. Production always denies preview access, including when the flag is `true`. Protected backend data and actions require real server-validated authentication.
+Run `npm run dev` locally or `npm run build` and `npm start` for a production build. All dashboard pages are accessible without authentication or deployment configuration. Sign In opens the Overview and creates no session. Fixtures use fictional identities, non-deliverable `example.invalid` emails, non-dialable phone labels, and fictional addresses.
 
 The Overview includes quick search, operational metrics, transaction/job/customer donut charts, a revenue trend, quick actions, and trade totals. `src/features/dashboard/fixtures/overviewFixtures.ts` owns the static presentation values. These are not API responses or live records. The job category sum differs from the supplied center total by 10; the visual reference values are retained. Intermediate revenue trend points are approximate presentation values. Search reports that its service is unavailable; date selection updates only the control, not the fixtures. Unimplemented destinations and administrative actions are disabled. “Sign out” leaves the preview for sign-in without claiming to revoke a session.
 
@@ -174,6 +174,8 @@ Create/edit, messaging, password resets, suspension, wallet changes, and unavail
 | `npm run test:watch`   | Run Vitest interactively                           |
 | `npm run test:e2e`     | Run Playwright against a production server         |
 | `npm run build`        | Create the production build                        |
+| `npm run build:demo`   | Alias for the standard public fixture build        |
+| `npm run start:demo`   | Alias for the standard server                      |
 | `npm start`            | Serve the production build                         |
 | `npm run check`        | Run types, lint, formatting, unit tests, and build |
 
@@ -187,7 +189,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-Playwright starts its own production server on `127.0.0.1:4317`; keep that port available. Its desktop and mobile Chromium projects cover login routing, denied dashboard access, responsive overflow, authentication panel scrolling, keyboard focus, and not-found recovery. Authentication tests also cover all nine UI routes at 320, 375, 425, 768, 1024, and 1440px, short viewports at 768×600 and 1440×700, local form interactions, and unavailable backend actions. `npm run check` builds the application but does not run Playwright. Customer browser tests cover all nine views at the same six widths and short heights, URL-state controls, profile routes, galleries, plan browsing, keyboard disclosures, and production access denial. Browser tests start a production server on port 4317 with the preview flag deliberately set to true to verify access remains denied, and a development preview server on port 4318. Keep both ports available. The test-only PLAYWRIGHT_PREVIEW flag isolates the development test server in .next-playwright so it can coexist with a normal development session.
+Playwright starts a production server on `127.0.0.1:4317`. Tests cover public Sign In navigation and direct access, all dashboard sections, responsive layouts, form validation, keyboard navigation, reduced motion, and blocked administrative requests. Keep that port available. `npm run check` does not run Playwright.
 
 ## Build and deployment
 
@@ -200,3 +202,9 @@ npm start
 Set public environment values before building. `npm start` serves the generated build using the standard Next.js server. No hosting-provider configuration or deployment pipeline is included in this repository.
 
 `next.config.ts` disables the framework identification header and configures MIME-sniffing protection, frame denial, referrer policy, and restrictions on camera, microphone, and geolocation. These headers supplement application and backend authorization. Connect and enforce production authentication before exposing protected administrative data or actions.
+
+## Vercel deployment
+
+Use the Next.js framework preset, Node.js 24.x, install command `npm ci`, build command `npm run build`, and the default output directory. No project/team IDs, hostname allowlists, OIDC configuration, or preview flags are required. Existing values for those retired settings are ignored and may be removed from Vercel. `npm run build:demo` and `npm run start:demo` remain aliases for the normal commands.
+
+All deployments expose the same public synthetic fixture dashboard. Sign In navigates to Overview without credentials, cookies, tokens, or an authenticated administrator session. Direct dashboard routes and refreshes work without deployment restrictions. The persistent Demo Mode badge identifies the interface as a demonstration. Administrative requests, server-action POSTs, APIs, and exports remain blocked; backend-dependent controls remain disabled. CSP restricts production browser connections to the frontend origin. Integrate real server authentication and backend authorization before enabling private records or administrative operations.

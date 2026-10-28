@@ -27,3 +27,24 @@ it('rejects absolute endpoint URLs before dispatch', async () => {
   ).rejects.toMatchObject({ code: 'configuration' });
   expect(adapter).not.toHaveBeenCalled();
 });
+
+it('blocks administrative reads and writes in every deployment before the adapter runs', async () => {
+  vi.doMock('@/config/env', () => ({
+    publicEnv: {
+      apiBaseUrl: 'https://admin.example.invalid',
+      apiTimeoutMs: 15000,
+    },
+  }));
+  try {
+    const { apiClient } = await import('./apiClient');
+    const adapter = vi.fn();
+    for (const method of ['get', 'post', 'patch', 'delete'] as const) {
+      await expect(
+        apiClient.request({ method, url: '/private', adapter }),
+      ).rejects.toMatchObject({ code: 'configuration' });
+    }
+    expect(adapter).not.toHaveBeenCalled();
+  } finally {
+    vi.unstubAllEnvs();
+  }
+});

@@ -6,12 +6,12 @@ describe('customer fixture controls', () => {
   it('combines case-insensitive search and status without changing the source records', () => {
     const rows = filterFixtureRows(
       CUSTOMERS,
-      '  EMMA  ',
+      '  THREE  ',
       'Inactive',
       (row) => row.fullName,
       (row) => row.status,
     );
-    expect(rows.map((row) => row.id)).toEqual(['raisychen']);
+    expect(rows.map((row) => row.id)).toEqual(['demo-user-003']);
     expect(CUSTOMERS).toHaveLength(12);
     expect(
       filterFixtureRows(
@@ -37,11 +37,11 @@ describe('customer fixture controls', () => {
   it('preserves spaces while typing and validates hostile URL state', () => {
     expect(
       customerQuerySchema.parse({
-        search: 'Tokunbo ',
+        search: 'Demo ',
         status: 'all',
         page: '2',
       }).search,
-    ).toBe('Tokunbo ');
+    ).toBe('Demo ');
     expect(
       customerQuerySchema.parse({ search: 'all', status: 'all', page: '-3' })
         .page,

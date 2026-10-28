@@ -15,6 +15,7 @@ export default defineConfig({
         '**/customers.spec.ts',
         '**/management.spec.ts',
         '**/operations.spec.ts',
+        '**/demo.spec.ts',
       ],
       use: { ...devices['Desktop Chrome'] },
     },
@@ -25,37 +26,38 @@ export default defineConfig({
         '**/customers.spec.ts',
         '**/management.spec.ts',
         '**/operations.spec.ts',
+        '**/demo.spec.ts',
       ],
       use: { ...devices['Pixel 7'] },
     },
     {
       name: 'overview-preview',
-      // Serialize journeys against the shared development compiler/HMR server.
-      workers: 1,
+      workers: 2,
       expect: { timeout: 15_000 },
-      // Development compilation and routed refresh checks need more time than production journeys.
+      // Allow time for multi-route responsive and refresh journeys.
       timeout: 90_000,
       testMatch: [
         '**/overview.spec.ts',
         '**/customers.spec.ts',
         '**/management.spec.ts',
         '**/operations.spec.ts',
+        '**/demo.spec.ts',
       ],
-      use: { ...devices['Desktop Chrome'], baseURL: 'http://127.0.0.1:4318' },
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: 'http://127.0.0.1:4317',
+      },
     },
   ],
-  webServer: [
-    {
-      command: 'npm run start -- --hostname 127.0.0.1 --port 4317',
-      url: 'http://127.0.0.1:4317',
-      reuseExistingServer: false,
-      env: { DASHBOARD_UI_PREVIEW: 'true' },
+  webServer: {
+    command: 'npm run start -- --hostname 127.0.0.1 --port 4317',
+    url: 'http://127.0.0.1:4317',
+    reuseExistingServer: false,
+    // Legacy deployment settings must not prevent public fixture access.
+    env: {
+      DASHBOARD_UI_PREVIEW: 'false',
+      APP_DEPLOYMENT_MODE: 'production',
+      VERCEL: '1',
     },
-    {
-      command: 'npm run dev -- --webpack --hostname 127.0.0.1 --port 4318',
-      url: 'http://127.0.0.1:4318',
-      reuseExistingServer: false,
-      env: { DASHBOARD_UI_PREVIEW: 'true', PLAYWRIGHT_PREVIEW: 'true' },
-    },
-  ],
+  },
 });

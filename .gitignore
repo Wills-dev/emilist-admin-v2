@@ -10,3 +10,6 @@ test-results/
 .DS_Store
 
 .next-playwright/
+
+.next-demo/
+.test-deployment/

@@ -11,50 +11,22 @@ test('root opens the existing login interface', async ({ page }) => {
   ).toBeVisible();
 });
 
-test('dashboard access fails closed without a server session', async ({
+test('public fixture dashboard opens directly without a session', async ({
   page,
   context,
 }) => {
-  await context.addCookies([
-    { name: 'session', value: 'unverified', url: 'http://127.0.0.1:4317' },
-  ]);
-  await page.addInitScript(() => {
-    localStorage.setItem('authenticated', 'true');
-  });
   await page.goto('/dashboard');
-  await expect(page).toHaveURL('/login');
-  await expect(
-    page.getByRole('heading', { name: 'Sign In', exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole('heading', { name: 'Overview', exact: true }),
-  ).toHaveCount(0);
-  for (const path of [
-    '/payments',
-    '/support',
-    '/reports',
-    '/settings',
-    '/settings/permissions',
-    '/jobs',
-    '/materials',
-    '/materials/orders',
-    '/customers',
-    '/customers/612c54',
-    '/customers/612c54/jobs',
-  ]) {
-    await page.goto(path);
-    await expect(page).toHaveURL('/login');
-    await expect(
-      page.getByRole('heading', { name: 'Tokunbo Ajibade Williams' }),
-    ).toHaveCount(0);
-  }
+  await expect(page).toHaveURL('/dashboard');
+  await expect(page.getByText('Demo Mode', { exact: true })).toBeVisible();
+  expect(await context.cookies()).toEqual([]);
 });
 
-test('unknown routes recover to the public sign-in entry point', async ({
+test('unknown request paths remain blocked in the public fixture preview', async ({
   page,
 }) => {
   const response = await page.goto('/missing-route');
-  expect(response?.status()).toBe(404);
-  await page.getByRole('link', { name: 'Return to sign in' }).click();
-  await expect(page).toHaveURL('/login');
+  expect(response?.status()).toBe(403);
+  await expect(
+    page.getByText('Unavailable in Demo Mode.', { exact: false }),
+  ).toBeVisible();
 });

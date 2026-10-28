@@ -9,7 +9,7 @@ import { SubscriptionPlans } from '@/components/organisms/SubscriptionPlans/Subs
 import { EmptyState } from '@/components/molecules/EmptyState/EmptyState';
 
 export function CustomerSubscriptions({ customerId }: { customerId: string }) {
-  if (customerId !== '612c54')
+  if (customerId !== 'demo-customer-001')
     return (
       <EmptyState
         title="No subscription fixtures"

@@ -89,8 +89,10 @@ for (const { width, height } of viewports) {
       await panel.evaluate((element) => {
         element.scrollTop = 0;
       });
-      for (const button of await page.locator('button[type="submit"]').all())
-        await expect(button).toBeDisabled();
+      for (const button of await page.locator('button[type="submit"]').all()) {
+        if (route === '/login') await expect(button).toBeEnabled();
+        else await expect(button).toBeDisabled();
+      }
       if (testInfo.project.name === 'chromium' && [375, 1440].includes(width)) {
         await page.screenshot({
           path: testInfo.outputPath(
@@ -123,8 +125,11 @@ test('sign-in navigation and local validation never authenticate', async ({
   ).toHaveAttribute('type', 'text');
   await page.getByRole('checkbox').check();
   await page.getByLabel('Enter Password', { exact: true }).press('Enter');
-  await expect(page).toHaveURL('/login');
-  await expect(page.getByRole('button', { name: 'Proceed' })).toBeDisabled();
+  await expect(page).toHaveURL('/dashboard');
+  await page.goto('/login');
+  await expect(
+    page.getByRole('button', { name: 'Sign In', exact: true }),
+  ).toBeEnabled();
   await page.getByRole('link', { name: 'Forgot Password?' }).click();
   await expect(page).toHaveURL('/forgot-password');
   await page.getByRole('link', { name: 'Back to Sign In' }).click();

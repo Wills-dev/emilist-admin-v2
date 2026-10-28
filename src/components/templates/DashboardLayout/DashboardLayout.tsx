@@ -4,10 +4,12 @@ import { DashboardSidebar } from '@/components/organisms/DashboardSidebar/Dashbo
 import { DashboardHeader } from '@/components/organisms/DashboardHeader/DashboardHeader';
 export function DashboardLayout({
   children,
+  demoMode = false,
   profile,
   date,
 }: {
   children: ReactNode;
+  demoMode?: boolean;
   profile: DashboardProfile;
   date: string;
 }) {
@@ -19,7 +21,11 @@ export function DashboardLayout({
       >
         Skip to content
       </a>
-      <DashboardHeader date={date} initials={profile.initials} />
+      <DashboardHeader
+        demoMode={demoMode}
+        date={date}
+        initials={profile.initials}
+      />
       <div className="flex min-h-0 flex-1 overflow-hidden">
         <DashboardSidebar profile={profile} />
         <main

@@ -11,8 +11,10 @@ import { emailSchema } from '@/features/auth/schemas/authSchemas';
 
 export function LoginForm({
   previewEnabled = false,
+  demoMode = false,
 }: {
   previewEnabled?: boolean;
+  demoMode?: boolean;
 }) {
   const router = useRouter();
   const {
@@ -82,9 +84,11 @@ export function LoginForm({
         submitLabel={previewEnabled ? 'Sign In' : 'Proceed'}
         disabled={!previewEnabled}
         unavailable={
-          previewEnabled
-            ? 'UI preview only — static sample data. No authentication or backend actions.'
-            : 'Sign-in is unavailable until the authentication service is connected.'
+          demoMode
+            ? 'Demo Mode — synthetic data only. This opens a demonstration, not an authenticated session.'
+            : previewEnabled
+              ? 'UI preview only — static sample data. No authentication or backend actions.'
+              : 'Sign-in is unavailable until the authentication service is connected.'
         }
       />
     </form>

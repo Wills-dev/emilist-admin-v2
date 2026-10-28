@@ -142,8 +142,10 @@ test('payment search, status, pagination and financial action disclosures remain
   await page.getByRole('button', { name: 'Toggle status filter' }).click();
   await page.getByLabel('Filter by status').selectOption('Failed');
   await expect(page.locator('tbody tr')).toHaveCount(1);
-  await expect(page.locator('tbody')).toContainText('Ava Taylor');
-  const disclosure = page.getByLabel('Actions for transaction 12345645');
+  await expect(page.locator('tbody')).toContainText('Demo Customer Five');
+  const disclosure = page.getByLabel(
+    'Actions for transaction demo-record-64-005',
+  );
   await disclosure.click();
   await expect(
     page.getByRole('button', { name: 'Refund — unavailable' }),
@@ -164,7 +166,7 @@ test('support combined priority/status filters persist and elapsed time never co
   await page.getByLabel('Filter by priority').selectOption('Critical');
   await page.getByLabel('Filter by status').selectOption('Resolved');
   await expect(page.locator('tbody tr')).toHaveCount(1);
-  await expect(page.locator('tbody')).toContainText('Emma Hernandez');
+  await expect(page.locator('tbody')).toContainText('Demo Customer Six');
   await page.reload();
   await expect(page.locator('tbody tr')).toHaveCount(1);
   expect(
@@ -173,7 +175,7 @@ test('support combined priority/status filters persist and elapsed time never co
       .first()
       .textContent(),
   ).toBe(text);
-  await page.getByLabel('Actions for ticket 12345746').click();
+  await page.getByLabel('Actions for ticket demo-record-74-006').click();
   for (const name of [
     'Assign ticket',
     'Resolve ticket',
@@ -229,13 +231,13 @@ test('configuration drafts cancel, spotlight selections are exclusive, and publi
   await page.getByRole('button', { name: 'Cancel edits' }).click();
   await expect(commission).toHaveValue('5');
   await page
-    .getByLabel('Select Isaac Okonkwo expert-isaac', { exact: true })
+    .getByLabel('Select Demo Candidate Alpha demo-expert-002', { exact: true })
     .check();
   await expect(
     page.locator('input[name="spotlight-expert"]:checked'),
   ).toHaveCount(1);
   await expect(
-    page.getByLabel('Select Tokunbo Ajibade Williams expert-tokunbo'),
+    page.getByLabel('Select Demo Customer One demo-expert-001'),
   ).not.toBeChecked();
   await expect(
     page.locator('input[name="spotlight-merchant"]:checked'),
@@ -248,12 +250,12 @@ test('configuration drafts cancel, spotlight selections are exclusive, and publi
   ).toBeDisabled();
   await page
     .getByRole('textbox', { name: 'Search spotlight candidates' })
-    .fill('Nuru');
+    .fill('Beta');
   await expect(
     page.getByText('No candidates match your filters.'),
   ).toBeVisible();
   await expect(
-    page.getByLabel('Select Nuru Mohammed merchant-nuru'),
+    page.getByLabel('Select Demo Candidate Beta demo-merchant-002'),
   ).toBeVisible();
   await page
     .getByRole('textbox', { name: 'Search spotlight candidates' })

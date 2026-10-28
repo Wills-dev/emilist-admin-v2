@@ -107,7 +107,9 @@ test('Jobs search, status, pagination, customer links and row disclosure work lo
   await expect(page.locator('tbody tr')).toHaveCount(1);
   await expect(page.locator('tbody')).toContainText('Post-Site Cleaning');
   await page.getByLabel('Filter by status').selectOption('all');
-  const summary = page.getByLabel('Actions for Home Furniture Upgrade 1234501');
+  const summary = page.getByLabel(
+    'Actions for Home Furniture Upgrade demo-record-50-001',
+  );
   await summary.click();
   await expect(
     page.getByRole('button', { name: 'Pause job — unavailable' }),
@@ -118,9 +120,9 @@ test('Jobs search, status, pagination, customer links and row disclosure work lo
   await page
     .locator('tbody tr')
     .first()
-    .getByRole('link', { name: 'tkwill75' })
+    .getByRole('link', { name: 'demo-user-001' })
     .click();
-  await expect(page).toHaveURL(/\/customers\/612c54$/);
+  await expect(page).toHaveURL(/\/customers\/demo-customer-001$/);
 });
 
 test('Materials tabs, stock, payment and delivery filters persist and never submit backend actions', async ({

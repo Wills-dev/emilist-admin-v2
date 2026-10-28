@@ -16,11 +16,11 @@ it('preserves the authentication entry points and encodes dynamic route segments
 
 it('builds customer destinations from the selected ID and actual tab', () => {
   expect(CUSTOMER_ROUTES.details('a/b')).toBe('/customers/a%2Fb');
-  expect(CUSTOMER_ROUTES.tab('612c54', 'listedItems')).toBe(
-    '/customers/612c54/listed-items',
+  expect(CUSTOMER_ROUTES.tab('demo-customer-001', 'listedItems')).toBe(
+    '/customers/demo-customer-001/listed-items',
   );
-  expect(CUSTOMER_ROUTES.tab('raisychen', 'details')).toBe(
-    '/customers/raisychen',
+  expect(CUSTOMER_ROUTES.tab('demo-user-003', 'details')).toBe(
+    '/customers/demo-user-003',
   );
 });
 
