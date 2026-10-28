@@ -46,17 +46,30 @@ export function deploymentBinding(
     EMILIST_VERCEL_TEAM_ID: teamId,
     EMILIST_VERCEL_TEAM_SLUG: teamSlug,
   } = env;
-  if (
-    !demoId?.startsWith('prj_') ||
-    !adminId?.startsWith('prj_') ||
-    demoId === adminId ||
-    !teamId?.startsWith('team_') ||
-    !teamSlug ||
-    !/^[a-z0-9][a-z0-9-]*$/.test(teamSlug)
-  )
-    throw new Error(
-      'Deployment identity allowlist is missing or inconsistent.',
+  const invalidSettings: string[] = [];
+  if (!demoId?.startsWith('prj_'))
+    invalidSettings.push('DEMO_VERCEL_PROJECT_ID (expected a prj_ project ID)');
+  if (!adminId?.startsWith('prj_'))
+    invalidSettings.push(
+      'ADMIN_VERCEL_PROJECT_ID (expected a prj_ project ID)',
     );
+  if (demoId && demoId === adminId)
+    invalidSettings.push(
+      'DEMO_VERCEL_PROJECT_ID and ADMIN_VERCEL_PROJECT_ID (must be different)',
+    );
+  if (!teamId?.startsWith('team_'))
+    invalidSettings.push('EMILIST_VERCEL_TEAM_ID (expected a team_ ID)');
+  if (!teamSlug || !/^[a-z0-9][a-z0-9-]*$/.test(teamSlug))
+    invalidSettings.push(
+      'EMILIST_VERCEL_TEAM_SLUG (expected the team slug, not its display name)',
+    );
+  if (invalidSettings.length)
+    throw new Error(
+      `Deployment identity allowlist is missing or inconsistent. Check these Vercel project environment variables: ${invalidSettings.join('; ')}. Set them for the deployment environment and redeploy. Configuration values are intentionally omitted.`,
+    );
+  // Keep the narrowed allowlist explicit after collecting diagnostics.
+  if (!demoId || !adminId || !teamId || !teamSlug)
+    throw new Error('Deployment identity configuration is incomplete.');
   const demoHosts = deploymentHosts(env.DEMO_ALLOWED_HOSTS);
   const adminHosts = deploymentHosts(env.ADMIN_ALLOWED_HOSTS);
   if (demoHosts.some((host) => adminHosts.includes(host)))

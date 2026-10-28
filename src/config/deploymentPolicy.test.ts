@@ -56,3 +56,24 @@ it('rejects missing, wildcard, overlapping, or URL-shaped hostname allowlists', 
   ])
     expect(() => deploymentBinding('demo', { ...env, ...change })).toThrow();
 });
+
+it('names missing identity settings without revealing configuration values', () => {
+  expect(() => deploymentBinding('demo', {})).toThrow(
+    /DEMO_VERCEL_PROJECT_ID.*ADMIN_VERCEL_PROJECT_ID.*EMILIST_VERCEL_TEAM_ID.*EMILIST_VERCEL_TEAM_SLUG/,
+  );
+  try {
+    deploymentBinding('demo', {
+      ...env,
+      DEMO_VERCEL_PROJECT_ID: 'private-invalid-value',
+      EMILIST_VERCEL_TEAM_SLUG: 'Private Display Name',
+    });
+    throw new Error('Expected validation to reject invalid configuration');
+  } catch (error) {
+    expect(error).toBeInstanceOf(Error);
+    const message = (error as Error).message;
+    expect(message).toContain('DEMO_VERCEL_PROJECT_ID');
+    expect(message).toContain('EMILIST_VERCEL_TEAM_SLUG');
+    expect(message).not.toContain('private-invalid-value');
+    expect(message).not.toContain('Private Display Name');
+  }
+});
