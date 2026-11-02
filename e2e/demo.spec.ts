@@ -1,5 +1,9 @@
 import { expect, test } from '@playwright/test';
-import { ROUTES, CUSTOMER_ROUTES } from '../src/constants/routes';
+import {
+  PAYMENT_ROUTES,
+  ROUTES,
+  CUSTOMER_ROUTES,
+} from '../src/constants/routes';
 const routes = [
   ROUTES.dashboard,
   ROUTES.customers,
@@ -55,8 +59,8 @@ test('demo has no API or mutation transport and blocks external administrative c
 }) => {
   await page.goto(ROUTES.payments);
   await expect(
-    page.getByRole('button', { name: 'View', exact: true }).first(),
-  ).toBeDisabled();
+    page.getByRole('link', { name: 'View', exact: true }).first(),
+  ).toHaveAttribute('href', PAYMENT_ROUTES.details('demo-record-64-001'));
   const response = await request.get('/api/private');
   expect(response.status()).toBe(403);
   for (const path of [ROUTES.dashboard, '/api/payments', '/reports/export'])

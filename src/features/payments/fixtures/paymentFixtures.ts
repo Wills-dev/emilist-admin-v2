@@ -98,7 +98,7 @@ export const PAYMENTS: readonly Payment[] = [
     description: 'Sample transaction',
     amount: 10000,
     method: 'Bank Transfer',
-    status: 'Pending',
+    status: 'Successful',
   },
 ];
 export const PAYMENT_COUNT = '565,162';
@@ -126,3 +126,7 @@ export const PAYMENT_METRICS = [
     change: '+5.4%',
   },
 ];
+
+export function getPayment(paymentId: string): Payment | undefined {
+  return PAYMENTS.find((payment) => payment.id === paymentId);
+}

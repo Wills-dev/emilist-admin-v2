@@ -230,3 +230,9 @@ The return dialog supports a validated reason draft, cancellation, Escape dismis
 `/materials/listings/[productId]` displays the selected catalog product, unit price, stock, sales count, category, synthetic location, merchant, and listing status. `MATERIAL_ROUTES.listing` builds its URL; `MATERIAL_ROUTES.productOrders` opens Orders filtered by product ID. Catalog View links retain the selected product identity; unknown products return a not-found page.
 
 Listing and order details reuse the product information tabs, review summaries, comment search, gallery placeholders, and accessible action-dialog presentation. De-List Item opens a validated reason draft with cancellation and keyboard dismissal. Submission remains disabled and does not change stock or listing status. Product photographs and attachment files remain unavailable.
+
+### Payment transaction details
+
+`/payments/[paymentId]` displays the selected synthetic transaction in a standalone, viewport-constrained receipt view. Payment View links and row menus use `PAYMENT_ROUTES.details`. Direct links and refreshes work; unknown IDs return a not-found page. Back, Close, and Escape return to Payments without changing a record or creating a session.
+
+Credit/debit visuals derive from direction; pending, successful, and failed indicators derive independently from status. Successful details use the display label Completed; pending/failed records do not claim funds were received or sent. Dates, amounts, methods, counterparties, and IDs retain the selected fixture values. The labelled additional pagination sample includes a successful credit to cover that state. Copy ID works locally. PDF downloads remain disabled because verified receipt files and backend contracts have not been supplied. The Demo Mode indicator and administrative network restrictions remain in effect.
