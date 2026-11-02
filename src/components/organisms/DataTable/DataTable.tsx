@@ -12,12 +12,14 @@ export function DataTable<T>({
   rowKey,
   caption,
   emptyMessage = 'No records match your search or filters.',
+  tableClassName,
 }: {
   rows: readonly T[];
   columns: readonly DataTableColumn<T>[];
   rowKey: (row: T) => string;
   caption: string;
   emptyMessage?: string;
+  tableClassName?: string;
 }) {
   return (
     <div
@@ -26,7 +28,12 @@ export function DataTable<T>({
       tabIndex={0}
       className="min-w-0 overflow-x-auto bg-white outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-inset"
     >
-      <table className="w-full min-w-240 table-fixed text-left text-xs">
+      <table
+        className={cn(
+          'w-full min-w-240 table-fixed text-left text-xs',
+          tableClassName,
+        )}
+      >
         <caption className="sr-only">
           {caption} — static presentation fixtures
         </caption>

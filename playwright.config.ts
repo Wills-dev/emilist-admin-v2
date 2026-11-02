@@ -16,6 +16,7 @@ export default defineConfig({
         '**/management.spec.ts',
         '**/operations.spec.ts',
         '**/demo.spec.ts',
+        '**/job-details.spec.ts',
       ],
       use: { ...devices['Desktop Chrome'] },
     },
@@ -27,6 +28,7 @@ export default defineConfig({
         '**/management.spec.ts',
         '**/operations.spec.ts',
         '**/demo.spec.ts',
+        '**/job-details.spec.ts',
       ],
       use: { ...devices['Pixel 7'] },
     },
@@ -42,6 +44,7 @@ export default defineConfig({
         '**/management.spec.ts',
         '**/operations.spec.ts',
         '**/demo.spec.ts',
+        '**/job-details.spec.ts',
       ],
       use: {
         ...devices['Desktop Chrome'],

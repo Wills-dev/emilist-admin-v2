@@ -15,7 +15,7 @@ import {
   formatNaira,
 } from '@/features/customers/helpers/customerHelpers';
 import { CustomerTabs } from '@/features/customers/components/CustomerTabs/CustomerTabs';
-import { CopyValue } from '@/features/customers/components/CopyValue/CopyValue';
+import { CopyValue } from '@/components/molecules/CopyValue/CopyValue';
 export function CustomerDetailsLayout({
   customer,
   children,
