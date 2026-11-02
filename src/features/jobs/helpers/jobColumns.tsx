@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { CUSTOMER_ROUTES } from '@/constants/routes';
+import { CUSTOMER_ROUTES, JOB_ROUTES } from '@/constants/routes';
 import type { DataTableColumn } from '@/components/organisms/DataTable/DataTable';
 import { RecordActions } from '@/components/molecules/RecordActions/RecordActions';
 import { RecordStatus } from '@/components/molecules/RecordStatus/RecordStatus';
@@ -98,17 +98,17 @@ export const jobColumns: readonly DataTableColumn<Job>[] = [
     className: 'w-24',
     cell: (row) => (
       <div className="flex items-center justify-end gap-2">
-        <button
-          type="button"
-          disabled
-          title="Job details await a supplied design and backend integration"
-          className="text-xs text-indigo-500 disabled:cursor-not-allowed"
+        <Link
+          href={JOB_ROUTES.details(row.id)}
+          className="rounded text-xs text-indigo-500 underline-offset-2 transition-colors hover:text-indigo-700 hover:underline focus-visible:outline-2 focus-visible:outline-emerald-600 motion-reduce:transition-none"
         >
           View
-        </button>
+        </Link>
         <RecordActions
           name={`${row.title} ${row.id}`}
-          actions={['View job', 'Edit job', 'Pause job']}
+          viewHref={JOB_ROUTES.details(row.id)}
+          viewLabel="View job"
+          actions={['Edit job', 'Pause job']}
         />
       </div>
     ),

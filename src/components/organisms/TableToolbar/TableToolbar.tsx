@@ -15,6 +15,7 @@ export function TableToolbar({
   leading,
   icon: Icon = UsersRound,
   filterControls,
+  filterLabel = 'Status',
 }: {
   label: string;
   count: string | number;
@@ -27,6 +28,7 @@ export function TableToolbar({
   leading?: ReactNode;
   icon?: LucideIcon;
   filterControls?: ReactNode;
+  filterLabel?: string;
 }) {
   const [filterOpen, setFilterOpen] = useState(false);
   return (
@@ -68,9 +70,9 @@ export function TableToolbar({
       {filterOpen && (
         <div className="flex flex-wrap gap-3 motion-safe:animate-[overview-enter_200ms_ease-out]">
           <label className="mt-3 flex items-center gap-3 text-xs text-slate-500">
-            Status
+            {filterLabel}
             <select
-              aria-label="Filter by status"
+              aria-label={`Filter by ${filterLabel.toLowerCase()}`}
               value={status}
               onChange={(event) => onStatus(event.target.value)}
               className="rounded-lg border border-slate-200 bg-white p-2 focus-visible:outline-2 focus-visible:outline-emerald-600"

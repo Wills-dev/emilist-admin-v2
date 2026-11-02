@@ -9,8 +9,8 @@ export const JOBS: readonly Job[] = [
     customerId: 'demo-customer-001',
     duration: '3 weeks',
     budget: 450000,
-    applicants: 0,
-    status: 'Draft',
+    applicants: 6,
+    status: 'Active',
   },
   {
     id: 'demo-record-50-002',
@@ -116,7 +116,7 @@ export const JOBS: readonly Job[] = [
     duration: '2 days',
     budget: 50000,
     applicants: 2,
-    status: 'Listed',
+    status: 'Draft',
   },
 ];
 export const JOB_TOTAL = '565,162';

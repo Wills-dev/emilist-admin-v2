@@ -63,3 +63,20 @@ export const CUSTOMER_ROUTES = {
       : root;
   },
 };
+
+export const JOB_TAB_PATHS = {
+  details: '',
+  applicants: 'applicants',
+  invoices: 'invoices',
+  payments: 'payments',
+} as const;
+export type JobTab = keyof typeof JOB_TAB_PATHS;
+export const JOB_ROUTES = {
+  details: (jobId: string) => buildRoute(`${ROUTES.jobs}/:jobId`, { jobId }),
+  tab: (jobId: string, tab: JobTab) => {
+    const root = buildRoute(`${ROUTES.jobs}/:jobId`, { jobId });
+    return JOB_TAB_PATHS[tab] ? `${root}/${JOB_TAB_PATHS[tab]}` : root;
+  },
+  milestone: (jobId: string, milestoneId: string) =>
+    `${buildRoute(`${ROUTES.jobs}/:jobId`, { jobId })}?milestone=${encodeURIComponent(milestoneId)}`,
+};
