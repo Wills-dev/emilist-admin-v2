@@ -31,7 +31,8 @@ export function SupportPage() {
       />
       <p role="note" className="text-[10px] text-slate-500">
         Static ticket presentation data · 9 samples. Times are fixed
-        elapsed-time examples, not operational SLAs. Ticket actions unavailable.
+        elapsed-time examples, not operational SLAs. Backend ticket actions
+        unavailable.
       </p>
       <TableToolbar
         label="Ticket count"
