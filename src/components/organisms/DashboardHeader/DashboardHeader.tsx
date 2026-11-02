@@ -1,5 +1,6 @@
 'use client';
 import Image from 'next/image';
+import type { ReactNode } from 'react';
 import { Bell, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/Button/Button';
 import { useSidebarStore } from '@/hooks/useSidebarStore/useSidebarStore';
@@ -7,10 +8,12 @@ export function DashboardHeader({
   demoMode = false,
   date,
   initials,
+  accountMenu,
 }: {
   demoMode?: boolean;
   date: string;
   initials: string;
+  accountMenu?: ReactNode;
 }) {
   const { open, setOpen } = useSidebarStore();
   return (
@@ -52,12 +55,14 @@ export function DashboardHeader({
         >
           <Bell className="size-4" strokeWidth={1.5} />
         </button>
-        <span
-          aria-label="Sample profile"
-          className="flex size-8 items-center justify-center rounded-full bg-[#727987] text-xs text-white"
-        >
-          {initials}
-        </span>
+        {accountMenu || (
+          <span
+            aria-label="Sample profile"
+            className="flex size-8 items-center justify-center rounded-full bg-[#727987] text-xs text-white"
+          >
+            {initials}
+          </span>
+        )}
       </div>
     </header>
   );

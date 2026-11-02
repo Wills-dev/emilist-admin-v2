@@ -143,7 +143,7 @@ Shared `DataTable`, `TableToolbar`, `SummaryMetrics`, `Pagination`, `RecordActio
 
 Development previews include `/payments`, `/support`, `/reports`, `/settings`, and `/settings/permissions`. Payments and Support use domain-owned typed fixtures, local URL-backed search, filters, pagination, and disabled backend operations. Ticket elapsed times are fixed samples, not live countdowns or operational SLAs.
 
-Reports composes the dashboard feature's public read-only analytics export, reusing its existing charts and summary components. Its supplied job total is 65,162; the Overview fixture remains unchanged. Its URL-backed date-range selector changes the displayed reporting period only; it does not retrieve or recalculate analytics.
+Reports owns six independent synthetic analytics charts: churn, acquisition, job success, daily active users, material sales, and subscription plan performance. Overview fixtures remain unchanged. Report periods are URL-backed presentation filters; they do not retrieve or recalculate data. The average job success metric (79%) is separate from the completed share (82%) shown in its distribution.
 
 Settings has route-aware Platform Configuration and User Permissions tabs. Platform fields support validated local drafts and cancellation; saving is unavailable. Subscription cards reuse the shared plan carousel. Spotlight candidates permit one local selection per category, with search and category filters; publishing is unavailable. The roles table uses typed presentation permission keys and local search, status filters, and pagination. These role fixtures never grant authorization, and invitations and role mutations remain unavailable.
 
@@ -242,3 +242,17 @@ Credit/debit visuals derive from direction; pending, successful, and failed indi
 `/support/[ticketId]` displays the selected synthetic ticket, summary, priority, assignee, static queue time, admin notes, attachment placeholders, and conversation. Support View links and row menus use `SUPPORT_ROUTES.details`; unknown IDs return a not-found page. The featured wallet ticket has five fictional messages and six attachment placeholders. Other tickets show empty conversation states rather than borrowing this history.
 
 Conversation search and sender filtering persist in the URL. Attachment controls browse placeholders only. Reply, escalation, and resolution drafts use React Hook Form and Zod; opening dialogs or editing drafts never sends a message or updates ticket records. Dialogs support keyboard dismissal, focus trapping, and focus restoration. All confirmations, uploads, and message sending remain disabled until backend integration; resolved samples also disable the reply draft and resolution trigger. Drafts are discarded on dismissal or navigation, and elapsed times never count down.
+
+### Shared calendar controls
+
+Use `components/ui/Calendar` as the calendar primitive and `components/molecules/DatePicker` or `DateRangePicker` for date entry. Reports custom ranges and recurring-job schedules use these controls. Do not introduce separate native date pickers or alternate calendar styles. Dates use validated `YYYY-MM-DD` strings; date arithmetic and display use UTC to avoid timezone shifts.
+
+The calendar uses Monday-first weeks, month/year selectors, green selected dates, and a light range highlight. Arrow keys move by day/week, Home/End move within a week, Page Up/Down change months, and Shift+Page Up/Down change years. Pickers support Escape dismissal and focus restoration; range changes apply only after confirmation. Report custom dates persist in the URL and remain presentation-only filters.
+
+### Profile, account navigation, and administrative drafts
+
+`/profile` displays the shared Demo Operator persona and 15 fictional activity records using reserved `.test` email and TEST-NET addresses. The sidebar profile links here; the navbar avatar opens a keyboard-accessible menu with Profile, Change Password, and Sign Out. `/profile/change-password` provides visibility controls, password requirements, and local validation; submission remains disabled. Activity dates use the shared calendar and filter sample records locally.
+
+Sign Out requires confirmation and navigates back to Login. It exits the preview without creating, revoking, or pretending to manage an authentication session.
+
+Reports includes an Export Reports dialog with report/date/format drafts. User Permissions and Profile open the same Invite New Admin form. Subscription Settings opens a pricing editor for Basic, Silver, Gold, and Platinum. Customer details include temporary/permanent suspension drafts with a reason and optional context. All download, invitation, password, pricing, and suspension confirmations remain disabled until supplied backend contracts and authorization are integrated. Draft edits do not update fixtures or simulate successful actions.

@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import type { ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
 import * as Dialog from '@radix-ui/react-dialog';
 import {
@@ -10,7 +11,6 @@ import {
   Wallet,
   MessageSquare,
   Files,
-  CircleHelp,
   Settings,
   LogOut,
   X,
@@ -30,12 +30,17 @@ const primaryItems = [
 ];
 const secondaryItems = [
   { label: 'Reports', icon: Files, href: ROUTES.reports },
-  { label: 'Internal Tickets', icon: CircleHelp },
   { label: 'Settings', icon: Settings, href: ROUTES.settings },
 ];
 const itemClass =
   'flex w-full items-center gap-3 rounded-md px-3 py-1.5 text-left text-sm transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-emerald-600 motion-reduce:transition-none';
-export function DashboardSidebar({ profile }: { profile: DashboardProfile }) {
+export function DashboardSidebar({
+  profile,
+  signOutAction,
+}: {
+  profile: DashboardProfile;
+  signOutAction?: ReactNode;
+}) {
   const { open, setOpen } = useSidebarStore();
   const pathname = usePathname();
   const isActive = (href: string) =>
@@ -113,20 +118,27 @@ export function DashboardSidebar({ profile }: { profile: DashboardProfile }) {
               </button>
             ),
           )}
-          <Link
-            href={ROUTES.login}
-            onClick={() => setOpen(false)}
-            className={cn(
-              itemClass,
-              'bg-[#f8f9f8] text-red-600 hover:bg-red-50',
-            )}
-            aria-label="Leave preview and return to sign in"
-          >
-            <LogOut className="size-4" strokeWidth={1.5} />
-            Sign out
-          </Link>
+          {signOutAction || (
+            <Link
+              href={ROUTES.login}
+              onClick={() => setOpen(false)}
+              className={cn(
+                itemClass,
+                'bg-[#f8f9f8] text-red-600 hover:bg-red-50',
+              )}
+              aria-label="Leave preview and return to sign in"
+            >
+              <LogOut className="size-4" strokeWidth={1.5} />
+              Sign out
+            </Link>
+          )}
         </nav>
-        <div className="flex items-center gap-3 border-t border-[#f0f2f0] pt-5">
+        <Link
+          href={ROUTES.profile}
+          aria-label="View profile"
+          onClick={() => setOpen(false)}
+          className="flex items-center gap-3 rounded border-t border-[#f0f2f0] pt-5 focus-visible:outline-2 focus-visible:outline-emerald-600"
+        >
           <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#727987] text-xs text-white">
             {profile.initials}
           </span>
@@ -138,7 +150,7 @@ export function DashboardSidebar({ profile }: { profile: DashboardProfile }) {
               {profile.role} · Sample profile
             </p>
           </div>
-        </div>
+        </Link>
       </div>
     </>
   );

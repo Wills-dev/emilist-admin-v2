@@ -17,6 +17,8 @@ export const ROUTES = {
   payments: '/payments',
   support: '/support',
   reports: '/reports',
+  profile: '/profile',
+  changePassword: '/profile/change-password',
   settings: '/settings',
   settingsPermissions: '/settings/permissions',
   forbidden: '/forbidden',

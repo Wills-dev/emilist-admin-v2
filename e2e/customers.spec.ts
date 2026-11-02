@@ -144,7 +144,7 @@ test('view links retain the real selected customer ID and do not reuse another p
   ).toBeVisible();
   await expect(
     page.getByRole('button', { name: 'Suspend Account' }),
-  ).toBeDisabled();
+  ).toBeEnabled();
   await expect(
     page.getByRole('button', { name: 'Credit Wallet' }),
   ).toBeDisabled();

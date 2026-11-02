@@ -1,5 +1,6 @@
 'use client';
-import { useForm, useWatch } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
+import { DatePicker } from '@/components/molecules/DatePicker/DatePicker';
 import { recurringJobSchema } from '@/features/jobs/schemas/jobActionSchemas';
 export function RecurringJobForm() {
   const form = useForm<{
@@ -39,22 +40,26 @@ export function RecurringJobForm() {
       </label>
       <div className="grid min-w-0 gap-2 sm:grid-cols-2">
         {(['startDate', 'endDate'] as const).map((field) => (
-          <label key={field} className="min-w-0">
-            <span className="sr-only">
-              {field === 'startDate' ? 'Start date' : 'End date'}
-            </span>
-            <input
-              type="date"
-              {...form.register(field)}
-              aria-invalid={issues.some((issue) => issue.path[0] === field)}
-              aria-describedby={
-                issues.some((issue) => issue.path[0] === field)
-                  ? `recurring-${field}-error`
-                  : undefined
-              }
-              className={control}
-            />
-          </label>
+          <Controller
+            key={field}
+            control={form.control}
+            name={field}
+            render={({ field: dateField }) => (
+              <DatePicker
+                label={field === 'startDate' ? 'Start date' : 'End date'}
+                value={dateField.value}
+                name={dateField.name}
+                onChange={dateField.onChange}
+                onBlur={dateField.onBlur}
+                invalid={issues.some((issue) => issue.path[0] === field)}
+                describedBy={
+                  issues.some((issue) => issue.path[0] === field)
+                    ? `recurring-${field}-error`
+                    : undefined
+                }
+              />
+            )}
+          />
         ))}
       </div>
       <fieldset className="min-w-0">

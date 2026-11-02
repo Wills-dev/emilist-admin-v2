@@ -1,4 +1,5 @@
 'use client';
+import { InviteAdminDialog } from '@/features/settings/components/InviteAdminDialog/InviteAdminDialog';
 import { UserRoundCog } from 'lucide-react';
 import { TableToolbar } from '@/components/organisms/TableToolbar/TableToolbar';
 import { DataTable } from '@/components/organisms/DataTable/DataTable';
@@ -29,16 +30,7 @@ export function UserPermissions() {
             ADMIN ROLES
           </h3>
         }
-        action={
-          <button
-            type="button"
-            disabled
-            title="Admin invitations require the confirmed backend invitation flow"
-            className="rounded-lg bg-[#20c46b] px-3 py-2 text-xs text-white disabled:cursor-not-allowed"
-          >
-            + Invite new admin
-          </button>
-        }
+        action={<InviteAdminDialog />}
       />
       <DataTable
         caption="Admin roles"

@@ -14,7 +14,12 @@ const screens = [
     heading: 'Support',
     table: 'Support tickets',
   },
-  { path: ROUTES.reports, key: 'reports', heading: 'REPORTS', table: null },
+  {
+    path: ROUTES.reports,
+    key: 'reports',
+    heading: 'REPORTS & ANALYTICS',
+    table: null,
+  },
   { path: ROUTES.settings, key: 'platform', heading: 'Settings', table: null },
   {
     path: ROUTES.settingsPermissions,
@@ -48,7 +53,7 @@ for (const viewport of [
           .first(),
       ).toBeAttached();
       if (screen.key === 'reports')
-        await expect(page.locator('[data-slot="chart"]')).toHaveCount(4);
+        await expect(page.locator('[data-slot="chart"]')).toHaveCount(6);
       expect(
         await page.evaluate(
           () => document.documentElement.scrollWidth <= innerWidth,
@@ -192,12 +197,17 @@ test('Reports maintains an independent period without recalculating or restartin
 }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto(ROUTES.reports);
-  await expect(page.locator('[data-slot="chart"]')).toHaveCount(4);
-  await expect(page.getByText('65,162', { exact: true })).toBeVisible();
+  await expect(page.locator('[data-slot="chart"]')).toHaveCount(6);
+  await expect(
+    page.getByRole('heading', {
+      name: 'Job Success Rates by Timeframe',
+      exact: true,
+    }),
+  ).toBeVisible();
   await page.getByLabel('Report date range').selectOption('7');
   await expect(page).toHaveURL(/range=7/);
   await expect(page.getByText('Oct 25 – Oct 31, 2026')).toBeVisible();
-  await expect(page.getByText('₦4,860,000', { exact: true })).toBeVisible();
+  await expect(page.getByText('79%', { exact: true })).toBeVisible();
   expect(
     await page
       .locator('.overview-card')
@@ -206,10 +216,9 @@ test('Reports maintains an independent period without recalculating or restartin
   ).toBe('none');
   await page.reload();
   await expect(page.getByLabel('Report date range')).toHaveValue('7');
-  await page.getByRole('textbox', { name: 'Search customers' }).fill('test');
-  await expect(page.getByRole('status')).toContainText(
-    'requires a connected service',
-  );
+  await expect(
+    page.getByRole('button', { name: 'Export reports' }),
+  ).toBeEnabled();
 });
 
 test('configuration drafts cancel, spotlight selections are exclusive, and publication stays unavailable', async ({
@@ -247,7 +256,7 @@ test('configuration drafts cancel, spotlight selections are exclusive, and publi
   ).toBeDisabled();
   await expect(
     page.getByRole('button', { name: 'Edit subscription settings' }),
-  ).toBeDisabled();
+  ).toBeEnabled();
   await page
     .getByRole('textbox', { name: 'Search spotlight candidates' })
     .fill('Beta');
@@ -279,7 +288,7 @@ test('configuration drafts cancel, spotlight selections are exclusive, and publi
   await expect(page.locator('tbody tr')).toHaveCount(1);
   await expect(
     page.getByRole('button', { name: '+ Invite new admin' }),
-  ).toBeDisabled();
+  ).toBeEnabled();
   await page.getByLabel('Actions for Finance role').click();
   await expect(
     page.getByRole('button', { name: 'Edit permissions — unavailable' }),
