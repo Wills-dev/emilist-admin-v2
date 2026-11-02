@@ -2,8 +2,8 @@ import { MapPin, Clock, Layers, Users, BriefcaseBusiness } from 'lucide-react';
 import { CUSTOMER_ROUTES } from '@/constants/routes';
 import { CopyValue } from '@/components/molecules/CopyValue/CopyValue';
 import { RecordStatus } from '@/components/molecules/RecordStatus/RecordStatus';
-import { JobPartyCard } from '@/features/jobs/components/JobPartyCard/JobPartyCard';
-import { JobMediaGallery } from '@/features/jobs/components/JobMediaGallery/JobMediaGallery';
+import { ProfileSummaryCard } from '@/components/molecules/ProfileSummaryCard/ProfileSummaryCard';
+import { MediaGallery } from '@/components/organisms/MediaGallery/MediaGallery';
 import {
   compactJobBudget,
   formatJobDate,
@@ -66,7 +66,7 @@ export function JobOverview({ detail }: { detail: JobDetail }) {
             <dd>{job.applicants} applicants</dd>
           </div>
         </dl>
-        <JobPartyCard
+        <ProfileSummaryCard
           name={
             job.postedBy === 'demo-user-001'
               ? 'Demo Customer One'
@@ -78,10 +78,14 @@ export function JobOverview({ detail }: { detail: JobDetail }) {
           href={CUSTOMER_ROUTES.details(job.customerId)}
         />
       </div>
-      <JobMediaGallery />
+      <MediaGallery
+        label="job"
+        items={['Room overview', 'Cabinet repairs', 'Door repairs']}
+        wide
+      />
       {expert && (
         <div className="flex flex-wrap items-end justify-between gap-3 border-b border-slate-100 pb-4">
-          <JobPartyCard
+          <ProfileSummaryCard
             name={expert.name}
             username={expert.username}
             initials={expert.initials}

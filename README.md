@@ -135,7 +135,7 @@ The responsive shell retains a fixed header and an independently scrolling conte
 
 `/jobs` provides five job metrics and a nine-row listing with applicant counts, expert references, customer links, status filtering, search, and local pagination. `/materials` provides the Product Catalog; `/materials/orders` provides Orders. Both share five materials metrics, persistent route-based section links, and search, filtering, and pagination. Orders support combined delivery and payment filters.
 
-These screens use typed presentation fixtures in `features/jobs` and `features/materials`, with nine reference records and one explicitly labelled additional sample per collection. Metric totals are design values, not counts of downloaded records. Product image assets are not available; labelled image placeholders are shown. Material record details and all administrative mutations remain unavailable pending backend contracts. No backend services or endpoints are implemented for these modules.
+These screens use typed presentation fixtures in `features/jobs` and `features/materials`, with nine reference records and one explicitly labelled additional sample per collection. Metric totals are design values, not counts of downloaded records. Product image assets are not available; labelled image placeholders are shown. All administrative mutations remain unavailable pending backend contracts. No backend services or endpoints are implemented for these modules.
 
 Shared `DataTable`, `TableToolbar`, `SummaryMetrics`, `Pagination`, `RecordActions`, `RecordStatus`, and `ManagementSkeleton` components provide the common presentation. `hooks/useFixtureTable` owns local URL state; feature hooks select and filter domain fixtures. Confirmed API services and TanStack Query hooks will belong to each feature when integration contracts are available. Protected backend data must never use the static preview access policy.
 
@@ -216,3 +216,17 @@ All deployments expose the same public synthetic fixture dashboard. Sign In navi
 Applicant selection, search, experience/status filters, local pagination, milestone links, and image-placeholder navigation work locally. The featured synthetic furniture job includes six applicants, three milestones, four invoices, and three payments; other records show empty activity states. Totals are derived from these records. Job and expert photographs and attachment files have not been supplied, so labelled placeholders replace media and downloads are disabled.
 
 Available job dialogs depend on status: draft/in-review removal, listed approval/rejection, active pause/cancel, paused resume, overdue cancellation, and completed recurring conversion. Reason and recurring-schedule drafts use React Hook Form and Zod. Confirmations remain disabled; opening or completing a draft never changes a job or triggers a backend request. Dialogs support keyboard focus trapping, Escape dismissal, and focus restoration.
+
+### Material order details
+
+`/materials/orders/[orderId]` shows the selected synthetic order, merchant and buyer links, payment/delivery labels, product information, media placeholders, review distribution, and searchable sample comments. Use `MATERIAL_ROUTES.order` for order links and `MATERIAL_ROUTES.stock` for the catalog filtered by the selected product ID. Unknown orders return a not-found page.
+
+Description/specification selection and comment search persist in the URL. Quantities are read-only; order totals use the existing unit price multiplied by the selected quantity. Review totals and average ratings derive from the sample distribution. Detailed review samples are available for the cement order; other orders show empty review states.
+
+The return dialog supports a validated reason draft, cancellation, Escape dismissal, and focus restoration. Submission, review voting, quantity changes, and attachment downloads remain unavailable. No backend action or successful return is simulated. Shared `ProfileSummaryCard` and `MediaGallery` components provide the existing Jobs and Materials presentation patterns without cross-feature imports.
+
+### Material listing details
+
+`/materials/listings/[productId]` displays the selected catalog product, unit price, stock, sales count, category, synthetic location, merchant, and listing status. `MATERIAL_ROUTES.listing` builds its URL; `MATERIAL_ROUTES.productOrders` opens Orders filtered by product ID. Catalog View links retain the selected product identity; unknown products return a not-found page.
+
+Listing and order details reuse the product information tabs, review summaries, comment search, gallery placeholders, and accessible action-dialog presentation. De-List Item opens a validated reason draft with cancellation and keyboard dismissal. Submission remains disabled and does not change stock or listing status. Product photographs and attachment files remain unavailable.

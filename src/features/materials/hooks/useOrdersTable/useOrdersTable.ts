@@ -14,7 +14,7 @@ export function useOrdersTable() {
     ),
     pageSize: 9,
     searchText: (row) =>
-      `${row.id} ${row.product.name} ${row.buyer} ${row.product.merchant}`,
+      `${row.id} ${row.product.id} ${row.product.name} ${row.buyer} ${row.product.merchant}`,
     rowStatus: (row) => row.delivery,
   });
   return {

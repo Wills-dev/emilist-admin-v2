@@ -16,6 +16,7 @@ export function proxy(request: NextRequest) {
         )));
   const page =
     jobPage ||
+    /^\/materials\/(?:orders|listings)\/[^/]+$/.test(path) ||
     Object.values(ROUTES).some((route) => path === route) ||
     /^\/customers\/[^/]+(?:\/(?:services|jobs|listed-items|orders|sales|transactions|subscriptions))?$/.test(
       path,

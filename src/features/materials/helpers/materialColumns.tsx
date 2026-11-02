@@ -3,7 +3,7 @@ import Link from 'next/link';
 import type { DataTableColumn } from '@/components/organisms/DataTable/DataTable';
 import { RecordActions } from '@/components/molecules/RecordActions/RecordActions';
 import { RecordStatus } from '@/components/molecules/RecordStatus/RecordStatus';
-import { CUSTOMER_ROUTES } from '@/constants/routes';
+import { CUSTOMER_ROUTES, MATERIAL_ROUTES } from '@/constants/routes';
 import { formatNaira } from '@/lib/format/formatNaira';
 import { MaterialProductName } from '@/features/materials/components/MaterialProductName/MaterialProductName';
 import type {
@@ -17,24 +17,6 @@ function person(name: string, id: string) {
     <Link href={CUSTOMER_ROUTES.details(id)} className={linkClass}>
       {name}
     </Link>
-  );
-}
-function actions(name: string) {
-  return (
-    <div className="flex items-center justify-end gap-2">
-      <button
-        type="button"
-        disabled
-        title="Record details require backend integration and supplied detail designs"
-        className="text-xs text-indigo-500 disabled:cursor-not-allowed"
-      >
-        View
-      </button>
-      <RecordActions
-        name={name}
-        actions={['View record', 'Edit record', 'Cancel record']}
-      />
-    </div>
   );
 }
 export const catalogColumns: readonly DataTableColumn<MaterialProduct>[] = [
@@ -103,7 +85,22 @@ export const catalogColumns: readonly DataTableColumn<MaterialProduct>[] = [
     id: 'actions',
     header: '',
     className: 'w-24',
-    cell: (row) => actions(`${row.name} ${row.id}`),
+    cell: (row) => (
+      <div className="flex items-center justify-end gap-2">
+        <Link
+          href={MATERIAL_ROUTES.listing(row.id)}
+          className="rounded text-xs text-indigo-500 transition-colors hover:text-indigo-700 hover:underline focus-visible:outline-2 focus-visible:outline-emerald-600 motion-reduce:transition-none"
+        >
+          View
+        </Link>
+        <RecordActions
+          name={`${row.name} ${row.id}`}
+          viewHref={MATERIAL_ROUTES.listing(row.id)}
+          viewLabel="View listing"
+          actions={['Edit record', 'De-list item']}
+        />
+      </div>
+    ),
   },
 ];
 export const orderColumns: readonly DataTableColumn<MaterialOrder>[] = [
@@ -173,6 +170,21 @@ export const orderColumns: readonly DataTableColumn<MaterialOrder>[] = [
     id: 'actions',
     header: '',
     className: 'w-24',
-    cell: (row) => actions(`${row.product.name} ${row.id}`),
+    cell: (row) => (
+      <div className="flex items-center justify-end gap-2">
+        <Link
+          href={MATERIAL_ROUTES.order(row.id)}
+          className="rounded text-xs text-indigo-500 transition-colors hover:text-indigo-700 hover:underline focus-visible:outline-2 focus-visible:outline-emerald-600 motion-reduce:transition-none"
+        >
+          View
+        </Link>
+        <RecordActions
+          name={`${row.product.name} ${row.id}`}
+          viewHref={MATERIAL_ROUTES.order(row.id)}
+          viewLabel="View order"
+          actions={['Edit record', 'Cancel record']}
+        />
+      </div>
+    ),
   },
 ];

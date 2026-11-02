@@ -9,8 +9,8 @@ import {
 import { CopyValue } from '@/components/molecules/CopyValue/CopyValue';
 import { StatusBadge } from '@/components/ui/StatusBadge/StatusBadge';
 import { EmptyState } from '@/components/molecules/EmptyState/EmptyState';
-import { JobPartyCard } from '@/features/jobs/components/JobPartyCard/JobPartyCard';
-import { JobMediaGallery } from '@/features/jobs/components/JobMediaGallery/JobMediaGallery';
+import { ProfileSummaryCard } from '@/components/molecules/ProfileSummaryCard/ProfileSummaryCard';
+import { MediaGallery } from '@/components/organisms/MediaGallery/MediaGallery';
 import { useJobApplicants } from '@/features/jobs/hooks/useJobApplicants/useJobApplicants';
 import { formatJobDate } from '@/features/jobs/helpers/jobDetailHelpers';
 import type { JobDetail } from '@/features/jobs/types/jobDetailTypes';
@@ -96,8 +96,16 @@ export function JobApplicantInspector({ detail }: { detail: JobDetail }) {
               <dd>{selected.completed} completed jobs</dd>
             </div>
           </dl>
-          <JobMediaGallery key={selected.id} variant="expert" />
-          <JobPartyCard
+          <MediaGallery
+            key={selected.id}
+            label="expert"
+            items={[
+              'Workshop overview',
+              'Project example',
+              'Tools and materials',
+            ]}
+          />
+          <ProfileSummaryCard
             name={selected.name}
             username={selected.username}
             initials={selected.initials}

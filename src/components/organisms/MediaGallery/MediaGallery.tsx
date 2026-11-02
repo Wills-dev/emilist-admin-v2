@@ -7,25 +7,22 @@ import {
   FileText,
   FileVideo,
 } from 'lucide-react';
-export function JobMediaGallery({
-  variant = 'job',
+export function MediaGallery({
+  label,
+  items,
+  wide = false,
 }: {
-  variant?: 'job' | 'expert';
+  label: string;
+  items: readonly string[];
+  wide?: boolean;
 }) {
   const [index, setIndex] = useState(0);
-  const items =
-    variant === 'job'
-      ? ['Room overview', 'Cabinet repairs', 'Door repairs']
-      : ['Workshop overview', 'Project example', 'Tools and materials'];
   return (
-    <section
-      aria-label={variant === 'job' ? 'Job media' : 'Expert media'}
-      className="min-w-0"
-    >
+    <section aria-label={`${label} media`} className="min-w-0">
       <div
         role="img"
         aria-label={`${items[index]} — image not supplied`}
-        className={`flex min-h-40 items-center justify-center rounded-xl border-8 border-neutral-100 bg-stone-50 p-4 ${variant === 'job' ? 'aspect-[2.6/1]' : 'aspect-[4/3]'}`}
+        className={`flex min-h-40 items-center justify-center rounded-xl border-8 border-neutral-100 bg-stone-50 p-4 ${wide ? 'aspect-[2.6/1]' : 'aspect-[4/3]'}`}
       >
         <div className="text-center text-stone-400">
           <ImageOff className="mx-auto mb-2 size-8" />
@@ -36,16 +33,16 @@ export function JobMediaGallery({
       <div className="flex flex-wrap items-center gap-2 border-b border-slate-100 py-3">
         <button
           type="button"
-          aria-label={`Previous ${variant} image`}
-          onClick={() => setIndex((index + 2) % 3)}
+          aria-label={`Previous ${label} image`}
+          onClick={() => setIndex((index + items.length - 1) % items.length)}
           className="rounded p-2 text-neutral-500 transition-colors hover:bg-emerald-50 focus-visible:outline-2 focus-visible:outline-emerald-600 motion-reduce:transition-none"
         >
           <ArrowLeft className="size-3.5" />
         </button>
         <button
           type="button"
-          aria-label={`Next ${variant} image`}
-          onClick={() => setIndex((index + 1) % 3)}
+          aria-label={`Next ${label} image`}
+          onClick={() => setIndex((index + 1) % items.length)}
           className="rounded p-2 text-neutral-500 transition-colors hover:bg-emerald-50 focus-visible:outline-2 focus-visible:outline-emerald-600 motion-reduce:transition-none"
         >
           <ArrowRight className="size-3.5" />

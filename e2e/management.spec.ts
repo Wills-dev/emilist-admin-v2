@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { ROUTES } from '../src/constants/routes';
+import { ROUTES, MATERIAL_ROUTES } from '../src/constants/routes';
 
 const screens = [
   { path: ROUTES.jobs, title: 'Jobs' },
@@ -151,8 +151,8 @@ test('Materials tabs, stock, payment and delivery filters persist and never subm
     .fill('Ceiling');
   await expect(page.locator('tbody tr')).toHaveCount(1);
   await expect(
-    page.getByRole('button', { name: 'View', exact: true }),
-  ).toBeDisabled();
+    page.getByRole('link', { name: 'View', exact: true }),
+  ).toHaveAttribute('href', MATERIAL_ROUTES.order('order-demo-record-60-006'));
   await page
     .getByRole('link', { name: 'Product Catalog', exact: true })
     .click();
