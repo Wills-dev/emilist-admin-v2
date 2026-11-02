@@ -1,5 +1,7 @@
 'use client';
 import type { ReactNode } from 'react';
+import { usePathname } from 'next/navigation';
+import { ROUTES } from '@/constants/routes';
 import { Package, PackagePlus, Truck, RotateCcw, CircleX } from 'lucide-react';
 import { SummaryMetrics } from '@/components/molecules/SummaryMetrics/SummaryMetrics';
 const metrics = [
@@ -10,6 +12,9 @@ const metrics = [
   { label: 'Cancelled Orders', value: '10', icon: CircleX },
 ];
 export function MaterialsLayout({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  if (pathname !== ROUTES.materials && pathname !== ROUTES.materialOrders)
+    return <>{children}</>;
   return (
     <div className="space-y-4">
       <h1 className="sr-only">Materials</h1>

@@ -80,3 +80,14 @@ export const JOB_ROUTES = {
   milestone: (jobId: string, milestoneId: string) =>
     `${buildRoute(`${ROUTES.jobs}/:jobId`, { jobId })}?milestone=${encodeURIComponent(milestoneId)}`,
 };
+
+export const MATERIAL_ROUTES = {
+  listing: (productId: string) =>
+    buildRoute(`${ROUTES.materials}/listings/:productId`, { productId }),
+  productOrders: (productId: string) =>
+    `${ROUTES.materialOrders}?search=${encodeURIComponent(productId)}`,
+  order: (orderId: string) =>
+    buildRoute(`${ROUTES.materialOrders}/:orderId`, { orderId }),
+  stock: (productId: string) =>
+    `${ROUTES.materials}?search=${encodeURIComponent(productId)}`,
+};

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { BadgeCheck, Star } from 'lucide-react';
-export function JobPartyCard({
+export function ProfileSummaryCard({
   name,
   username,
   initials,
@@ -9,6 +9,7 @@ export function JobPartyCard({
   reviews = 51,
   href,
   verified = false,
+  showRating = true,
 }: {
   name: string;
   username: string;
@@ -18,6 +19,7 @@ export function JobPartyCard({
   reviews?: number;
   href?: string;
   verified?: boolean;
+  showRating?: boolean;
 }) {
   return (
     <div className="flex min-w-0 items-center gap-3 rounded-lg border border-slate-100 bg-gradient-to-br from-white to-neutral-50 p-3">
@@ -47,22 +49,24 @@ export function JobPartyCard({
         ) : (
           <p className="text-[10px] break-all text-emerald-600">{username}</p>
         )}
-        <div
-          aria-label={`${rating} out of 5, ${reviews} sample reviews`}
-          className="mt-1 flex flex-wrap items-center gap-1"
-        >
-          <span aria-hidden="true" className="inline-flex text-orange-400">
-            {Array.from({ length: 5 }, (_, i) => (
-              <Star
-                key={i}
-                className={`size-3 ${i < 4 ? 'fill-current' : 'fill-neutral-300 text-neutral-300'}`}
-              />
-            ))}
-          </span>
-          <span className="text-[8px] text-neutral-500">
-            ({reviews} reviews)
-          </span>
-        </div>
+        {showRating && (
+          <div
+            aria-label={`${rating} out of 5, ${reviews} sample reviews`}
+            className="mt-1 flex flex-wrap items-center gap-1"
+          >
+            <span aria-hidden="true" className="inline-flex text-orange-400">
+              {Array.from({ length: 5 }, (_, i) => (
+                <Star
+                  key={i}
+                  className={`size-3 ${i < 4 ? 'fill-current' : 'fill-neutral-300 text-neutral-300'}`}
+                />
+              ))}
+            </span>
+            <span className="text-[8px] text-neutral-500">
+              ({reviews} reviews)
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );
