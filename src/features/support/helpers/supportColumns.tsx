@@ -1,4 +1,6 @@
 'use client';
+import Link from 'next/link';
+import { SUPPORT_ROUTES } from '@/constants/routes';
 import type { DataTableColumn } from '@/components/organisms/DataTable/DataTable';
 import { RecordActions } from '@/components/molecules/RecordActions/RecordActions';
 import { RecordStatus } from '@/components/molecules/RecordStatus/RecordStatus';
@@ -88,16 +90,16 @@ export const supportColumns: readonly DataTableColumn<SupportTicket>[] = [
     className: 'w-24',
     cell: (row) => (
       <div className="flex items-center gap-2">
-        <button
-          disabled
-          type="button"
-          title="Ticket details require backend integration"
-          className="text-indigo-500 disabled:cursor-not-allowed"
+        <Link
+          href={SUPPORT_ROUTES.details(row.id)}
+          className="rounded text-indigo-500 transition-colors hover:text-indigo-700 hover:underline focus-visible:outline-2 focus-visible:outline-emerald-600 motion-reduce:transition-none"
         >
           View
-        </button>
+        </Link>
         <RecordActions
           name={`ticket ${row.id}`}
+          viewHref={SUPPORT_ROUTES.details(row.id)}
+          viewLabel="View ticket"
           actions={[
             'Assign ticket',
             'Resolve ticket',

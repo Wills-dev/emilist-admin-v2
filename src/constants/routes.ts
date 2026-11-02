@@ -96,3 +96,8 @@ export const PAYMENT_ROUTES = {
   details: (paymentId: string) =>
     buildRoute(`${ROUTES.payments}/:paymentId`, { paymentId }),
 };
+
+export const SUPPORT_ROUTES = {
+  details: (ticketId: string) =>
+    buildRoute(`${ROUTES.support}/:ticketId`, { ticketId }),
+};
