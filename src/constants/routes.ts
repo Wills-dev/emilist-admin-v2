@@ -91,3 +91,8 @@ export const MATERIAL_ROUTES = {
   stock: (productId: string) =>
     `${ROUTES.materials}?search=${encodeURIComponent(productId)}`,
 };
+
+export const PAYMENT_ROUTES = {
+  details: (paymentId: string) =>
+    buildRoute(`${ROUTES.payments}/:paymentId`, { paymentId }),
+};

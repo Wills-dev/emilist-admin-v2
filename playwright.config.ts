@@ -19,6 +19,7 @@ export default defineConfig({
         '**/job-details.spec.ts',
         '**/material-order-details.spec.ts',
         '**/material-listing-details.spec.ts',
+        '**/payment-details.spec.ts',
       ],
       use: { ...devices['Desktop Chrome'] },
     },
@@ -33,6 +34,7 @@ export default defineConfig({
         '**/job-details.spec.ts',
         '**/material-order-details.spec.ts',
         '**/material-listing-details.spec.ts',
+        '**/payment-details.spec.ts',
       ],
       use: { ...devices['Pixel 7'] },
     },
@@ -51,6 +53,7 @@ export default defineConfig({
         '**/job-details.spec.ts',
         '**/material-order-details.spec.ts',
         '**/material-listing-details.spec.ts',
+        '**/payment-details.spec.ts',
       ],
       use: {
         ...devices['Desktop Chrome'],
