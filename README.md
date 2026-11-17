@@ -2,7 +2,7 @@
 
 Administration frontend for the Emilist services marketplace, built with Next.js App Router and TypeScript.
 
-The application currently provides a responsive dashboard shell, desktop and mobile navigation, loading skeletons, empty states, error recovery, and access-state pages. Shared API, query, and authorization utilities are available, but live marketplace integrations and production authentication are not connected. Every deployment exposes only a public synthetic fixture preview; private data and backend mutations are unavailable.
+The application currently provides a responsive dashboard shell, desktop and mobile navigation, loading skeletons, empty states, error recovery, and access-state pages. Login and authenticator MFA are connected through server routes and HttpOnly cookies; live marketplace integrations are not connected. Every deployment exposes only a public synthetic fixture preview; private data and backend mutations are unavailable.
 
 ## Technology stack
 
@@ -27,18 +27,24 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Open http://localhost:3000. The root route redirects to `/login`. The shell runs without an API base URL; API requests are rejected until one is configured.
+Open http://localhost:3000. The root route redirects to `/login`. The synthetic shell runs without a backend. Authentication requires the private `EMILIST_API_URL` setting.
 
 ## Environment configuration
 
-Public configuration is validated with Zod in `src/config/env.ts`.
+Private authentication configuration is validated in `src/config/authServerEnv.ts`.
+Browser configuration is validated in `src/config/env.ts`.
 
-| Variable                     | Purpose                                                   | Default                      |
-| ---------------------------- | --------------------------------------------------------- | ---------------------------- |
-| `NEXT_PUBLIC_API_BASE_URL`   | HTTP(S) backend base URL                                  | Unset; API requests disabled |
-| `NEXT_PUBLIC_API_TIMEOUT_MS` | Integer request timeout, from 1000 to 120000 milliseconds | `15000`                      |
+| Variable                     | Purpose                                                       | Default                     |
+| ---------------------------- | ------------------------------------------------------------- | --------------------------- |
+| `EMILIST_API_URL`            | Server-only backend URL, e.g. `https://be.emilist.com/api/v1` | Required for authentication |
+| `EMILIST_API_TIMEOUT_MS`     | Upstream timeout, 1000–30000 milliseconds                     | `12000`                     |
+| `NEXT_PUBLIC_API_TIMEOUT_MS` | Browser request timeout, 1000–120000 milliseconds             | `15000`                     |
 
-Use [.env.example](.env.example) as the configuration reference. Next.js embeds `NEXT_PUBLIC_` values at build time, so set them before production builds. These values are public and must never contain secrets. Local environment files are excluded from version control.
+Use [.env.example](.env.example) as the configuration reference. Keep the browser
+timeout above the upstream timeout. Production backend URLs must use HTTPS.
+Backend URLs and access tokens stay server-only. Browser requests use only the
+same-origin `/api/admin-auth/*` handlers; legacy public backend URL settings are
+not used. Local environment files are excluded from version control.
 
 ## Architecture
 
@@ -88,7 +94,7 @@ See [AGENTS.md](AGENTS.md) for the complete engineering conventions.
 
 ## API and state management
 
-`src/lib/api/apiClient.ts` centralizes browser requests with a configured base URL, credentialed requests, bounded timeout, relative endpoint validation, and safe error normalization. Raw backend errors are not displayed to users. No feature endpoints or domain response contracts are currently implemented.
+`src/lib/api/apiClient.ts` centralizes browser requests with a bounded timeout, same-origin authentication route allowlist, credentials, and safe error normalization. Feature API functions own requests and hooks own TanStack Query mutations. Only login, verification, and local logout are enabled; arbitrary administrative API transport stays blocked. Server-only authentication services validate and forward the confirmed backend requests. Raw backend errors and final access tokens are never returned to browser JavaScript.
 
 Feature service functions own API calls and typed contracts; dedicated feature hooks own TanStack Query integration. Presentation components do not call Axios directly. Services must use confirmed backend endpoints and contracts, support `AbortSignal`, and validate response shapes where appropriate.
 
@@ -100,11 +106,11 @@ Use TanStack Query for remote data, Zustand for shared UI state, URL parameters 
 
 `src/lib/auth/session.ts` defines a server-only `SessionAdapter` interface and a `requirePermission` helper. `src/lib/auth/authorization.ts` provides an internal `AdminSession` model and permission checks that deny absent, invalid, or expired sessions. These utilities are not connected to a session backend. The dashboard server layout exposes public synthetic UI fixtures. This does not establish a session. Real protected data and actions must remain unavailable until a verified session adapter is implemented. Once connected, authenticated visitors to `/` or `/login` should be redirected to `/dashboard` using a verified server session.
 
-The `/unauthorized` and `/forbidden` routes provide presentation states; they do not enforce HTTP authorization. Authentication forms are available, but backend login, logout, invitation verification, enrollment, email delivery, and password changes are not connected. Setting the API base URL alone does not establish authentication.
+The `/unauthorized` and `/forbidden` routes provide presentation states; they do not enforce HTTP authorization. Login, MFA verification/enrollment, and local cookie logout are connected. Invitation onboarding, password reset, email delivery, and password changes remain preview-only.
 
 Protected functionality requires a backend session adapter that verifies server-managed HttpOnly, Secure, SameSite cookies and maps authoritative permissions into the internal session model. Enforce authorization close to server data access and actions, with independent enforcement by backend APIs. UI visibility checks are supplemental. Never store sensitive tokens in localStorage.
 
-Cookie scope, credentialed CORS, CSRF protection, expiry, revocation, and login/logout contracts must be established with the backend. Session-expiration handling must cancel private requests, clear private query data, and use the confirmed login flow; that lifecycle is not yet implemented.
+Authentication handlers require same-origin JSON POSTs and reject cross-site requests. The session cookie is host-only, HttpOnly, SameSite=Lax, Path=/, Secure in production, and expires after seven days. Logout clears this browser cookie and query caches; no backend revocation endpoint was supplied. Protected-data session revalidation, authoritative permission mapping, and revocation handling remain prerequisites for enabling real administrative records or operations.
 
 ## Authentication UI
 
@@ -119,11 +125,11 @@ Cookie scope, credentialed CORS, CSRF protection, expiry, revocation, and login/
 
 Forms support local email/password validation, password visibility, live password requirements, confirmation matching, and six-digit code entry with paste and keyboard navigation. Account setup steps link between UI views without saving or verifying data. The shared authentication layout uses the supplied SVG assets and hides the illustration panel on small screens. It occupies the dynamic viewport height: the header and illustration remain stationary while only the form panel scrolls.
 
-Backend-dependent actions remain disabled even when local fields are valid. The static UI preview described below permits only navigation to static UI fixtures. The delivery-status view does not claim an email was sent. Invitation details, QR enrollment, and secret-key values remain unavailable until verified backend data exists. No form completion establishes a session; the preview Sign In button only navigates to static dashboard fixtures. Password requirements are UI validation rules and must be reconciled with the backend policy during integration.
+Other backend-dependent actions remain disabled even when local fields are valid. The dashboard preview uses static UI fixtures; login submits to the supplied backend endpoint. The delivery-status view does not claim an email was sent. Login enrollment renders the backend-provided URI as a local QR code and offers the returned manual key. MFA verification establishes the HttpOnly session before navigating to the dashboard. Invitation-specific enrollment remains unavailable without its own integration. Password requirements are UI validation rules and must be reconciled with the backend policy during integration.
 
 ## Public UI preview
 
-Run `npm run dev` locally or `npm run build` and `npm start` for a production build. All dashboard pages are accessible without authentication or deployment configuration. Sign In opens the Overview and creates no session. Fixtures use fictional identities, non-deliverable `example.invalid` emails, non-dialable phone labels, and fictional addresses.
+Run `npm run dev` locally or `npm run build` and `npm start` for a production build. All dashboard pages are accessible without authentication or deployment configuration. Sign In completes password and authenticator verification before navigating to the dashboard. Fixtures use fictional identities, non-deliverable `example.invalid` emails, non-dialable phone labels, and fictional addresses.
 
 The Overview includes quick search, operational metrics, transaction/job/customer donut charts, a revenue trend, quick actions, and trade totals. `src/features/dashboard/fixtures/overviewFixtures.ts` owns the static presentation values. These are not API responses or live records. The job category sum differs from the supplied center total by 10; the visual reference values are retained. Intermediate revenue trend points are approximate presentation values. Search reports that its service is unavailable; date selection updates only the control, not the fixtures. Unimplemented destinations and administrative actions are disabled. “Sign out” leaves the preview for sign-in without claiming to revoke a session.
 
@@ -189,7 +195,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-Playwright starts a production server on `127.0.0.1:4317`. Tests cover public Sign In navigation and direct access, all dashboard sections, responsive layouts, form validation, keyboard navigation, reduced motion, and blocked administrative requests. Keep that port available. `npm run check` does not run Playwright.
+Playwright starts a production server on `127.0.0.1:4317`. Tests cover intercepted login submissions and public dashboard access, all dashboard sections, responsive layouts, form validation, keyboard navigation, reduced motion, and blocked administrative requests. Keep that port available. `npm run check` does not run Playwright.
 
 ## Build and deployment
 
@@ -207,7 +213,7 @@ Set public environment values before building. `npm start` serves the generated 
 
 Use the Next.js framework preset, Node.js 24.x, install command `npm ci`, build command `npm run build`, and the default output directory. No project/team IDs, hostname allowlists, OIDC configuration, or preview flags are required. Existing values for those retired settings are ignored and may be removed from Vercel. `npm run build:demo` and `npm run start:demo` remain aliases for the normal commands.
 
-All deployments expose the same public synthetic fixture dashboard. Sign In navigates to Overview without credentials, cookies, tokens, or an authenticated administrator session. Direct dashboard routes and refreshes work without deployment restrictions. The persistent Demo Mode badge identifies the interface as a demonstration. Administrative requests, server-action POSTs, APIs, and exports remain blocked; backend-dependent controls remain disabled. CSP restricts production browser connections to the frontend origin. Integrate real server authentication and backend authorization before enabling private records or administrative operations.
+All deployments expose the same public synthetic fixture dashboard. Sign In submits entered credentials to the configured backend; it establishes an HttpOnly session only after successful MFA verification. Direct dashboard routes and refreshes work without deployment restrictions. The persistent Demo Mode badge identifies the interface as a demonstration. Administrative transport other than the three same-origin authentication handlers, server-action POSTs, and exports remains blocked; backend-dependent controls remain disabled. CSP restricts production browser connections to the frontend origin; server routes contact the configured backend. Integrate real server authentication and backend authorization before enabling private records or administrative operations.
 
 ### Job details
 
@@ -253,6 +259,47 @@ The calendar uses Monday-first weeks, month/year selectors, green selected dates
 
 `/profile` displays the shared Demo Operator persona and 15 fictional activity records using reserved `.test` email and TEST-NET addresses. The sidebar profile links here; the navbar avatar opens a keyboard-accessible menu with Profile, Change Password, and Sign Out. `/profile/change-password` provides visibility controls, password requirements, and local validation; submission remains disabled. Activity dates use the shared calendar and filter sample records locally.
 
-Sign Out requires confirmation and navigates back to Login. It exits the preview without creating, revoking, or pretending to manage an authentication session.
+Sign Out requires confirmation, clears the local HttpOnly session cookie and query caches, and navigates back to Login. Backend token revocation is not implemented because no revocation endpoint was supplied.
 
 Reports includes an Export Reports dialog with report/date/format drafts. User Permissions and Profile open the same Invite New Admin form. Subscription Settings opens a pricing editor for Basic, Silver, Gold, and Platinum. Customer details include temporary/permanent suspension drafts with a reason and optional context. All download, invitation, password, pricing, and suspension confirmations remain disabled until supplied backend contracts and authorization are integrated. Draft edits do not update fixtures or simulate successful actions.
+
+### Admin login and MFA
+
+The login screen submits credentials through the same-origin login handler.
+Zod validates both backend responses: `mfaRequired` opens normal verification;
+`mfaEnrollmentRequired` opens authenticator enrollment. The enrollment QR is
+rendered locally with `react-qr-code`, using the complete backend URI unchanged.
+A manual key and copy action are also available. Normal login never renders an
+authenticator secret or QR code.
+
+TanStack Query owns the in-memory MFA state. Challenge and enrollment UI flows
+expire after five and fifteen minutes respectively; refresh, leaving the screen,
+returning to credentials, and successful verification clear the details. Codes
+stay strings, including leading zeroes. Mutations never retry automatically.
+Duplicate submissions are disabled, cancellation stays quiet, errors are safe,
+and Sonner supplies feedback. Expired or invalid challenges return to sign-in.
+Repeated invalid codes show guidance to enable automatic device date and time.
+
+Thin route handlers delegate to feature-owned server services:
+
+| Browser handler                              | Confirmed backend request                       |
+| -------------------------------------------- | ----------------------------------------------- |
+| `POST /api/admin-auth/login`                 | `POST /admin/login`                             |
+| `POST /api/admin-auth/verify`, mode `login`  | `POST /admin/login/mfa`                         |
+| `POST /api/admin-auth/verify`, mode `enroll` | `POST /admin/login/mfa/enroll`                  |
+| `POST /api/admin-auth/logout`                | Clears the local cookie; no upstream revocation |
+
+Only a validated successful MFA response for an active, MFA-enabled admin sets
+the seven-day `emilist_admin_token` HttpOnly cookie. The bearer token is stripped
+from browser JSON. Server requests are bounded, uncached, and do not follow
+redirects; request bodies, origins, modes, and response schemas are validated.
+Sensitive values never go to localStorage, sessionStorage, URLs, logs, external
+QR services, or fixture data. The final admin response is not used to infer
+permissions or enable protected operations.
+
+The dashboard remains a public synthetic fixture preview in all environments,
+including after sign-in. Its displayed profile is a fixture, not the signed-in
+admin. A server-validated session adapter and backend authorization are still
+required before enabling private records or administrative operations.
+Invitation onboarding and password reset are separate integrations and remain
+preview-only; the login endpoints are never reused for those token purposes.

@@ -1,8 +1,9 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { ROUTES, JOB_TAB_PATHS } from '@/constants/routes';
+import { ADMIN_AUTH_ROUTES } from '@/config/adminAuth';
 
 export function proxy(request: NextRequest) {
-  // Demo builds have no mutation transport, API routes, server actions or downloads.
+  // Only explicit authentication handlers accept POSTs; fixture mutations stay blocked.
   const path = request.nextUrl.pathname;
   const jobSegments = path.startsWith(`${ROUTES.jobs}/`)
     ? path.slice(ROUTES.jobs.length + 1).split('/')
@@ -27,18 +28,35 @@ export function proxy(request: NextRequest) {
     path.startsWith('/_next/') ||
     path.startsWith('/images/') ||
     path === '/favicon.ico';
+  const authPost =
+    request.method === 'POST' &&
+    Object.values(ADMIN_AUTH_ROUTES).some((route) => route === path);
   const response =
-    !['GET', 'HEAD'].includes(request.method) || (!page && !asset)
+    !authPost &&
+    (!['GET', 'HEAD'].includes(request.method) || (!page && !asset))
       ? NextResponse.json(
           { error: 'Unavailable in Demo Mode.' },
           { status: 403 },
         )
       : NextResponse.next();
-  if (process.env.NODE_ENV === 'production')
+  if (process.env.NODE_ENV === 'production') {
     response.headers.set(
       'Content-Security-Policy',
-      "default-src 'self'; connect-src 'self'; img-src 'self' data:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; frame-src 'none'; object-src 'none'; worker-src 'none'; form-action 'none'; base-uri 'self'",
+      [
+        "default-src 'self'",
+        "connect-src 'self'",
+        "img-src 'self' data:",
+        "script-src 'self' 'unsafe-inline'",
+        "style-src 'self' 'unsafe-inline'",
+        "font-src 'self'",
+        "frame-src 'none'",
+        "object-src 'none'",
+        "worker-src 'none'",
+        "form-action 'none'",
+        "base-uri 'self'",
+      ].join('; '),
     );
+  }
   response.headers.set('Cache-Control', 'private, no-store');
   return response;
 }

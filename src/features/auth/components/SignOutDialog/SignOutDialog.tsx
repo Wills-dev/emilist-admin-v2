@@ -1,6 +1,8 @@
 'use client';
 import { useRouter } from 'next/navigation';
 import { LogOut } from 'lucide-react';
+import { toast } from 'sonner';
+import { useAdminLogout } from '@/features/auth/hooks/useAdminLogout/useAdminLogout';
 import { ActionDialog } from '@/components/molecules/ActionDialog/ActionDialog';
 import { ROUTES } from '@/constants/routes';
 import { useSidebarStore } from '@/hooks/useSidebarStore/useSidebarStore';
@@ -12,15 +14,28 @@ export function SignOutDialog({
   onOpenChange?: (open: boolean) => void;
 }) {
   const router = useRouter();
+  const logout = useAdminLogout();
+  async function signOut() {
+    if (logout.isPending) return;
+    try {
+      await logout.mutateAsync();
+      setOpen(false);
+      router.replace(ROUTES.login);
+      router.refresh();
+    } catch {
+      toast.error('Unable to sign out. Please try again.');
+    }
+  }
   const { setOpen } = useSidebarStore();
   return (
     <ActionDialog
       title="Sign Out"
-      description="Leave the demo and return to sign in?"
+      description="Clear this browser’s sign-in and return to the login screen?"
       width="sm"
       trigger={
         <button
           type="button"
+          disabled={logout.isPending}
           role={menuItem ? 'menuitem' : undefined}
           tabIndex={menuItem ? -1 : undefined}
           aria-label={
@@ -38,12 +53,11 @@ export function SignOutDialog({
       }
       confirmLabel="Sign Out"
       tone="danger"
-      confirmDisabled={false}
+      confirmDisabled={logout.isPending}
       note=""
       onOpenChange={onOpenChange}
       onConfirm={() => {
-        setOpen(false);
-        router.push(ROUTES.login);
+        void signOut();
       }}
     />
   );

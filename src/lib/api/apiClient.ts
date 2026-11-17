@@ -1,12 +1,21 @@
 import axios from 'axios';
+import { publicEnv } from '@/config/env';
+import { ADMIN_AUTH_ROUTES } from '@/config/adminAuth';
 import { ApiError, normalizeApiError } from './apiError';
 
-// This application exposes synthetic fixtures only. No administrative transport is enabled.
+// Only confirmed authentication POSTs are enabled; dashboard transport stays blocked.
 export const apiClient = axios.create({
-  timeout: 15000,
-  withCredentials: false,
+  timeout: publicEnv.apiTimeoutMs,
+  headers: { 'Content-Type': 'application/json' },
+  withCredentials: true,
 });
-apiClient.interceptors.request.use(() => {
+apiClient.interceptors.request.use((config) => {
+  const loginRequest =
+    !config.baseURL &&
+    Object.values(ADMIN_AUTH_ROUTES).some((path) => path === config.url) &&
+    config.method === 'post';
+  if (loginRequest) return config;
+
   throw new ApiError(
     'Administrative network requests are disabled in this fixture preview.',
     'configuration',

@@ -1,7 +1,81 @@
+'use client';
+
 import { QrCode } from 'lucide-react';
+import QRCode from 'react-qr-code';
+import { toast } from 'sonner';
+import { AdminMfaForm } from '@/features/auth/components/AdminMfaForm/AdminMfaForm';
+import { Button } from '@/components/ui/Button/Button';
+import type { AdminMfaEnrollment } from '@/features/auth/schemas/adminLoginResponseSchema';
 import { VerificationForm } from '@/features/auth/components/VerificationForm/VerificationForm';
 
-export function AuthenticatorSetup() {
+export function AuthenticatorSetup({
+  enrollment,
+  onRestart,
+}: {
+  enrollment?: AdminMfaEnrollment;
+  onRestart?: () => void;
+}) {
+  if (enrollment) {
+    const { authenticator } = enrollment;
+    async function copySecret() {
+      try {
+        await navigator.clipboard.writeText(authenticator.secret);
+        toast.success('Secret key copied');
+      } catch {
+        toast.error('Unable to copy the key. Enter it manually.');
+      }
+    }
+
+    return (
+      <section aria-label="Authenticator setup" className="space-y-5">
+        <p className="text-sm leading-6 text-neutral-600">
+          Scan the QR code with your authenticator app, or add a time-based
+          account using the manual setup key below. Keep the setup key private.
+        </p>
+        <div
+          role="img"
+          aria-label="Scan to set up your authenticator"
+          className="w-fit max-w-full rounded-lg bg-white p-4"
+        >
+          <QRCode
+            value={authenticator.otpauthUri}
+            size={200}
+            className="h-auto max-w-full"
+            aria-hidden="true"
+          />
+        </div>
+        <dl className="space-y-3 rounded-xl border border-neutral-200 p-4 text-sm">
+          <div>
+            <dt className="text-neutral-500">Issuer</dt>
+            <dd className="font-medium break-all">{authenticator.issuer}</dd>
+          </div>
+          <div>
+            <dt className="text-neutral-500">Account</dt>
+            <dd className="font-medium break-all">
+              {authenticator.accountName}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-neutral-500">Setup key</dt>
+            <dd className="mt-1 font-mono break-all">{authenticator.secret}</dd>
+          </div>
+        </dl>
+        <Button type="button" variant="outline" onClick={copySecret}>
+          Copy Secret Key
+        </Button>
+        <p role="note" className="text-sm leading-6 text-neutral-600">
+          Enter the six-digit code from your authenticator app below. Refreshing
+          or leaving clears these enrollment details.
+        </p>
+        <AdminMfaForm
+          mode="enrollment"
+          token={enrollment.enrollmentToken}
+          onRestart={onRestart}
+        />
+      </section>
+    );
+  }
+
   return (
     <>
       <section
