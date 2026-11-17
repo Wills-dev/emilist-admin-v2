@@ -139,5 +139,5 @@ export const SETTINGS_PLANS = [
   { name: 'Silver', amount: '₦24,000', active: true },
   { name: 'Basic', amount: 'Free', active: false },
   { name: 'Gold', amount: '₦32,000', active: false },
-  { name: 'Premium', amount: 'Not supplied', active: false },
+  { name: 'Platinum', amount: '₦48,000', active: false },
 ];

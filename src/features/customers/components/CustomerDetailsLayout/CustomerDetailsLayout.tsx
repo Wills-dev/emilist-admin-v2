@@ -1,3 +1,4 @@
+import { SuspendAccountDialog } from '@/features/customers/components/SuspendAccountDialog/SuspendAccountDialog';
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 import {
@@ -40,22 +41,20 @@ export function CustomerDetailsLayout({
           Back to Customers
         </Link>
         <div className="flex flex-wrap gap-3">
-          {[
-            'Edit User Profile',
-            'Send Message',
-            'Trigger Password Reset',
-            'Suspend Account',
-          ].map((label) => (
-            <button
-              key={label}
-              type="button"
-              disabled
-              title="Requires backend integration"
-              className={`rounded-xl px-4 py-2 text-[11px] disabled:cursor-not-allowed ${label === 'Suspend Account' ? 'bg-rose-50 text-rose-500' : 'bg-white text-slate-950'}`}
-            >
-              {label}
-            </button>
-          ))}
+          {['Edit User Profile', 'Send Message', 'Trigger Password Reset'].map(
+            (label) => (
+              <button
+                key={label}
+                type="button"
+                disabled
+                title="Requires backend integration"
+                className="rounded-xl bg-white px-4 py-2 text-[11px] text-slate-950 disabled:cursor-not-allowed"
+              >
+                {label}
+              </button>
+            ),
+          )}
+          <SuspendAccountDialog customer={customer} />
         </div>
       </div>
       <section

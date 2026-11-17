@@ -4,6 +4,8 @@ export class ApiError extends Error {
   constructor(
     message: string,
     public readonly code:
+      | 'flow_expired'
+      | 'invalid_code'
       | 'unauthorized'
       | 'forbidden'
       | 'network'
@@ -25,6 +27,22 @@ export function normalizeApiError(error: unknown): ApiError {
     return new ApiError('Request cancelled.', 'cancelled');
   if (axios.isAxiosError(error)) {
     const status = error.response?.status;
+    const data: unknown = error.response?.data;
+    if (data && typeof data === 'object' && 'code' in data) {
+      if (data.code === 'flow_expired')
+        return new ApiError(
+          'Your sign-in challenge expired. Please sign in again.',
+          'flow_expired',
+          status,
+        );
+      if (data.code === 'invalid_code')
+        return new ApiError(
+          'Invalid authenticator code. Please try the current code.',
+          'invalid_code',
+          status,
+        );
+    }
+
     if (status === 401)
       return new ApiError(
         'Your session is unavailable or has expired.',

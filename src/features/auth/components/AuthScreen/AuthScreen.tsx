@@ -5,7 +5,7 @@ import { AuthFormHeader } from '@/features/auth/components/AuthFormHeader/AuthFo
 import { AuthSteps } from '@/features/auth/components/AuthSteps/AuthSteps';
 import { AuthAccountSummary } from '@/features/auth/components/AuthAccountSummary/AuthAccountSummary';
 import { AuthActions } from '@/features/auth/components/AuthActions/AuthActions';
-import { LoginForm } from '@/features/auth/components/LoginForm/LoginForm';
+import { AdminLoginFlow } from '@/features/auth/components/AdminLoginFlow/AdminLoginFlow';
 import { NewPasswordForm } from '@/features/auth/components/NewPasswordForm/NewPasswordForm';
 import { ForgotPasswordForm } from '@/features/auth/components/ForgotPasswordForm/ForgotPasswordForm';
 import { VerificationForm } from '@/features/auth/components/VerificationForm/VerificationForm';
@@ -77,33 +77,25 @@ const screens = {
 >;
 export type AuthScreenName = keyof typeof screens;
 
-export function AuthScreen({
-  screen,
-  previewEnabled = false,
-  demoMode = false,
-}: {
-  screen: AuthScreenName;
-  previewEnabled?: boolean;
-  demoMode?: boolean;
-}) {
+export function AuthScreen({ screen }: { screen: AuthScreenName }) {
   const config = screens[screen];
   const invitation = config.variant === 'signup';
   return (
     <AuthLayout variant={config.variant}>
       <AuthTabs invitation={invitation} />
-      <AuthFormHeader
-        title={config.title}
-        description={config.description}
-        step={config.step}
-        total={config.variant === 'forgotPassword' ? 4 : 3}
-      />
+      {screen !== 'login' && (
+        <AuthFormHeader
+          title={config.title}
+          description={config.description}
+          step={config.step}
+          total={config.variant === 'forgotPassword' ? 4 : 3}
+        />
+      )}
       {invitation && <AuthSteps current={config.step} />}
       {(screen === 'resetVerify' || screen === 'resetPassword') && (
         <AuthSteps reset current={screen === 'resetVerify' ? 1 : 2} />
       )}
-      {screen === 'login' && (
-        <LoginForm demoMode={demoMode} previewEnabled={previewEnabled} />
-      )}
+      {screen === 'login' && <AdminLoginFlow />}
       {screen === 'loginVerify' && <VerificationForm />}
       {screen === 'invite' && (
         <>

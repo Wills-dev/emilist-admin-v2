@@ -28,16 +28,15 @@ const routes = [
   ROUTES.settings,
   ROUTES.settingsPermissions,
 ];
-test('dedicated demo artifact permits Sign In navigation without credentials or a session', async ({
+test('dashboard preview remains separate from validated sign-in', async ({
   page,
   context,
 }) => {
   await page.goto(ROUTES.login);
-  await expect(page.getByRole('note')).toContainText(
-    'not an authenticated session',
-  );
   await page.getByRole('button', { name: 'Sign In', exact: true }).click();
-  await expect(page).toHaveURL(ROUTES.dashboard);
+  await expect(page).toHaveURL(ROUTES.login);
+  await expect(page.getByText('Enter your password.')).toBeVisible();
+  await page.goto(ROUTES.dashboard);
   await expect(page.getByText('Demo Mode', { exact: true })).toBeVisible();
   expect(await context.cookies()).toEqual([]);
   expect(await page.evaluate(() => localStorage.length)).toBe(0);

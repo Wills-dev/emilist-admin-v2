@@ -1,12 +1,10 @@
+import { DEMO_PROFILE } from '@/constants/demoProfile';
 import type { DonutSummary } from '@/features/dashboard/types/overviewTypes';
 
 // Static presentation fixtures transcribed from the visual reference. Never live API data.
 export const OVERVIEW_FIXTURES = {
   date: 'Sunday, 27 September, 2027',
-  displayName: 'Demo Operator',
-  initials: 'DM',
-  role: 'Demo persona',
-  adminId: 'demo-admin-001',
+  ...DEMO_PROFILE,
   metrics: [
     {
       title: 'Pending KYC',

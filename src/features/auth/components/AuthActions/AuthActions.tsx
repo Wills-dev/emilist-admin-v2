@@ -34,7 +34,7 @@ export function AuthActions({
           <Button
             type="submit"
             disabled={disabled}
-            aria-describedby="auth-unavailable"
+            aria-describedby={unavailable ? 'auth-unavailable' : undefined}
             className="flex-1 bg-[#109f52] text-xs text-white transition-colors duration-200 ease-out hover:bg-[#0e8f4a] focus-visible:ring-emerald-600 disabled:opacity-50 motion-reduce:transition-none"
           >
             {submitLabel}

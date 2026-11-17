@@ -1,4 +1,18 @@
 import { expect, test } from '@playwright/test';
+import {
+  ADMIN_LOGIN_ENROLLMENT_FIXTURE,
+  ADMIN_LOGIN_CHALLENGE_FIXTURE,
+  ADMIN_MFA_RESPONSE_FIXTURE,
+} from '../src/features/auth/test/adminLoginResponseFixture';
+
+// Never let browser fixtures reach the live authentication backend.
+test.beforeEach(async ({ page }) => {
+  await page.route('**/api/admin-auth/**', (route) =>
+    route.request().url().endsWith('/logout')
+      ? route.continue()
+      : route.abort(),
+  );
+});
 
 const routes = [
   ['/login', 'Sign In'],
@@ -106,9 +120,26 @@ for (const { width, height } of viewports) {
   });
 }
 
-test('sign-in navigation and local validation never authenticate', async ({
+test('sign-in submits credentials and reports rejected authentication', async ({
   page,
 }) => {
+  let payload: unknown;
+  await page.route('**/api/admin-auth/login', async (route) => {
+    const headers = { 'Access-Control-Allow-Origin': '*' };
+    if (route.request().method() === 'OPTIONS') {
+      await route.fulfill({
+        status: 204,
+        headers: {
+          ...headers,
+          'Access-Control-Allow-Methods': 'POST',
+          'Access-Control-Allow-Headers': 'content-type',
+        },
+      });
+      return;
+    }
+    payload = route.request().postDataJSON();
+    await route.fulfill({ status: 401, json: {}, headers });
+  });
   await page.goto('/login');
   await page.getByLabel('Enter Work Email').fill('invalid');
   await page.getByLabel('Enter Work Email').blur();
@@ -123,9 +154,19 @@ test('sign-in navigation and local validation never authenticate', async ({
   await expect(
     page.getByLabel('Enter Password', { exact: true }),
   ).toHaveAttribute('type', 'text');
-  await page.getByRole('checkbox').check();
+  await expect(page.getByRole('checkbox')).toBeDisabled();
   await page.getByLabel('Enter Password', { exact: true }).press('Enter');
-  await expect(page).toHaveURL('/dashboard');
+  await expect(
+    page.getByRole('alert').filter({ hasText: 'Sign-in was rejected' }),
+  ).toBeVisible();
+  await expect(page.locator('[data-sonner-toast]')).toContainText(
+    'Sign-in was rejected. Check your email and password.',
+  );
+  expect(payload).toEqual({
+    email: 'admin@example.com',
+    password: 'LocalPassword1!',
+  });
+  await expect(page).toHaveURL('/login');
   await page.goto('/login');
   await expect(
     page.getByRole('button', { name: 'Sign In', exact: true }),
@@ -230,3 +271,218 @@ for (const width of [375, 768, 1440]) {
     );
   });
 }
+
+test('login MFA enrollment submits its code and clears on refresh', async ({
+  page,
+}) => {
+  let enrollmentPayload: unknown;
+  await page.route('**/api/admin-auth/verify', async (route) => {
+    const headers = {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST',
+      'Access-Control-Allow-Headers': 'content-type',
+    };
+    if (route.request().method() === 'OPTIONS') {
+      await route.fulfill({ status: 204, headers });
+      return;
+    }
+    enrollmentPayload = route.request().postDataJSON();
+    await route.fulfill({ status: 401, json: {}, headers });
+  });
+  await page.route('**/api/admin-auth/login', async (route) => {
+    const headers = {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST',
+      'Access-Control-Allow-Headers': 'content-type',
+    };
+    if (route.request().method() === 'OPTIONS') {
+      await route.fulfill({ status: 204, headers });
+      return;
+    }
+    await route.fulfill({
+      json: ADMIN_LOGIN_ENROLLMENT_FIXTURE,
+      headers,
+    });
+  });
+  await page.goto('/login');
+  await page.getByLabel('Enter Work Email').fill('admin@example.invalid');
+  await page
+    .getByLabel('Enter Password', { exact: true })
+    .fill('LocalPassword1!');
+  await page.getByRole('button', { name: 'Sign In', exact: true }).click();
+  await expect(
+    page.getByRole('heading', { name: 'Set up your authenticator' }),
+  ).toBeVisible();
+  await expect(page.getByText('admin@example.invalid')).toBeVisible();
+  await expect(
+    page.getByRole('button', { name: 'Confirm Enrollment' }),
+  ).toBeEnabled();
+  await page.getByLabel('Verification digit 1', { exact: true }).fill('012345');
+  await page.getByRole('button', { name: 'Confirm Enrollment' }).click();
+  await expect(
+    page.getByRole('alert').filter({
+      hasText: 'Verification was rejected.',
+    }),
+  ).toBeVisible();
+  expect(enrollmentPayload).toEqual({
+    mode: 'enroll',
+    flowToken: 'synthetic-enrollment-token',
+    code: '012345',
+  });
+  await expect(
+    page.locator('[data-sonner-toast]').filter({
+      hasText: 'Verification was rejected.',
+    }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('button', { name: 'Confirm Enrollment' }),
+  ).toBeEnabled();
+  await expect(page.getByText('synthetic-enrollment-token')).toHaveCount(0);
+  expect(
+    await page.evaluate(() => localStorage.length + sessionStorage.length),
+  ).toBe(0);
+  await expect(page).toHaveURL('/login');
+  await page.reload();
+  await expect(page.getByLabel('Enter Password', { exact: true })).toHaveValue(
+    '',
+  );
+  await expect(page.getByText('admin@example.invalid')).toHaveCount(0);
+});
+
+for (const mode of ['enrollment', 'challenge'] as const) {
+  test(`complete ${mode} MFA signs in without browser token storage`, async ({
+    page,
+  }) => {
+    const enrollment = mode === 'enrollment';
+    await page.route('**/api/admin-auth/login', (route) =>
+      route.fulfill({
+        json: enrollment
+          ? ADMIN_LOGIN_ENROLLMENT_FIXTURE
+          : ADMIN_LOGIN_CHALLENGE_FIXTURE,
+      }),
+    );
+    let verificationPayload: unknown;
+    await page.route('**/api/admin-auth/verify', (route) => {
+      verificationPayload = route.request().postDataJSON();
+      return route.fulfill({ json: ADMIN_MFA_RESPONSE_FIXTURE });
+    });
+    await page.goto('/login');
+    await page.getByLabel('Enter Work Email').fill('admin@example.invalid');
+    await page
+      .getByLabel('Enter Password', { exact: true })
+      .fill('LocalPassword1!');
+    await page.getByRole('button', { name: 'Sign In', exact: true }).click();
+    if (enrollment) {
+      await expect(
+        page.getByRole('img', { name: 'Scan to set up your authenticator' }),
+      ).toBeVisible();
+      await expect(
+        page.getByText(
+          ADMIN_LOGIN_ENROLLMENT_FIXTURE.data.authenticator.secret,
+        ),
+      ).toBeVisible();
+    } else {
+      await expect(
+        page.getByRole('heading', { name: 'Two-Factor Verification' }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole('img', { name: 'Scan to set up your authenticator' }),
+      ).toHaveCount(0);
+      await expect(
+        page.getByText(
+          ADMIN_LOGIN_ENROLLMENT_FIXTURE.data.authenticator.secret,
+        ),
+      ).toHaveCount(0);
+    }
+    await page
+      .getByLabel('Verification digit 1', { exact: true })
+      .fill('012345');
+    await page
+      .getByRole('button', {
+        name: enrollment ? 'Confirm Enrollment' : 'Verify Code',
+        exact: true,
+      })
+      .click();
+    await expect(page).toHaveURL('/dashboard');
+    expect(verificationPayload).toEqual({
+      mode: enrollment ? 'enroll' : 'login',
+      flowToken: enrollment
+        ? 'synthetic-enrollment-token'
+        : 'synthetic-challenge-token',
+      code: '012345',
+    });
+    expect(
+      await page.evaluate(() => localStorage.length + sessionStorage.length),
+    ).toBe(0);
+    await expect(page.getByText('Demo Mode', { exact: true })).toBeVisible();
+    await page.goto('/login');
+    await expect(
+      page.getByLabel('Enter Password', { exact: true }),
+    ).toHaveValue('');
+  });
+}
+
+test('expired MFA challenge returns to empty credential login', async ({
+  page,
+}) => {
+  await page.route('**/api/admin-auth/login', (route) =>
+    route.fulfill({ json: ADMIN_LOGIN_CHALLENGE_FIXTURE }),
+  );
+  await page.route('**/api/admin-auth/verify', (route) =>
+    route.fulfill({
+      status: 401,
+      json: { code: 'flow_expired' },
+    }),
+  );
+  await page.goto('/login');
+  await page.getByLabel('Enter Work Email').fill('admin@example.invalid');
+  await page
+    .getByLabel('Enter Password', { exact: true })
+    .fill('LocalPassword1!');
+  await page.getByRole('button', { name: 'Sign In', exact: true }).click();
+  await page.getByLabel('Verification digit 1', { exact: true }).fill('123456');
+  await page.getByRole('button', { name: 'Verify Code', exact: true }).click();
+  await expect(page.getByLabel('Enter Password', { exact: true })).toHaveValue(
+    '',
+  );
+  await expect(
+    page
+      .locator('[data-sonner-toast]')
+      .filter({ hasText: 'challenge expired' }),
+  ).toBeVisible();
+  await expect(
+    page.getByLabel('Verification digit 1', { exact: true }),
+  ).toHaveCount(0);
+});
+
+test('sign-out clears the HttpOnly browser session cookie', async ({
+  page,
+  context,
+}) => {
+  await context.addCookies([
+    {
+      name: 'emilist_admin_token',
+      value: 'synthetic-session',
+      url: 'http://127.0.0.1:4317',
+      httpOnly: true,
+      sameSite: 'Lax',
+    },
+  ]);
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto('/dashboard');
+  expect(await page.evaluate(() => document.cookie)).not.toContain(
+    'synthetic-session',
+  );
+  await page.getByLabel('Open profile menu').click();
+  await page.getByRole('menuitem', { name: 'Sign out', exact: true }).click();
+  await page
+    .getByRole('dialog', { name: 'Sign Out', exact: true })
+    .getByRole('button', { name: 'Sign Out', exact: true })
+    .click();
+  await expect(page).toHaveURL('/login');
+  expect(
+    (await context.cookies()).find(
+      (cookie) => cookie.name === 'emilist_admin_token',
+    ),
+  ).toBeUndefined();
+});

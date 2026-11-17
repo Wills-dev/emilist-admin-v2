@@ -11,7 +11,7 @@ Use Node.js 24 and npm. Keep exact dependency versions and `package-lock.json`; 
 - Use Next.js App Router, the `src/` structure, `@/*` imports, and strict TypeScript.
 - Keep route files thin: compose feature screens, templates, and layouts.
 - Prefer Server Components. Add client boundaries only for interaction, browser APIs, or client providers; preserve existing server/client boundaries.
-- Keep business domains in `features/<domain>`. Feature components, services, hooks, schemas, and types belong to their domain. Do not import unrelated features' implementation details. Reports may compose the dashboard feature's public read-only analytics export; chart implementation details and fixtures remain owned by dashboard.
+- Keep business domains in `features/<domain>`. Feature components, services, hooks, schemas, and types belong to their domain. Do not import unrelated features' implementation details. Reports owns its analytics and fixtures independently of Overview. Compose cross-feature controls in route/layout modules using explicit UI slots; shared components remain domain-independent.
 - Keep shared infrastructure in `lib/`, environment configuration in `config/`, and application providers in `providers/`.
 - API functions belong in feature services, TanStack Query logic in dedicated feature hooks, and presentation logic in components. Never call Axios from presentation components.
 - Avoid circular dependencies, large global collections of domain logic, and unnecessary abstraction. Favor composition and clear TypeScript contracts.
@@ -49,6 +49,8 @@ Tailwind CSS v4 is the primary styling system. Use utility classes, semantic CSS
 Use utilities for layout, spacing, typography, responsiveness, and interaction states. Avoid ordinary component CSS Modules, separate component stylesheets, inline styles where utilities suffice, unnecessary `!important`, and arbitrary values when design tokens are suitable. Limit global CSS to imports, tokens, resets, fonts, and genuinely global styles. Explain custom CSS when utilities are insufficient.
 
 Provide semantic markup, accessible names and labels, sufficient contrast, visible keyboard focus, logical navigation, and responsive layouts. Preserve modal focus management and Escape behavior. Implement loading skeletons shaped like the expected content, refetching indicators, empty states, recoverable errors, and disabled/pending states. Use localized action labels such as “Saving” and prevent duplicate submissions. Use inline form errors and appropriate Sonner feedback; avoid blanket loading overlays.
+
+Use the shared `Calendar` primitive and `DatePicker`/`DateRangePicker` molecules for all calendar-based date controls. Preserve Monday-first weeks, month/year selectors, green selection/range tokens, keyboard navigation, and picker focus restoration. Keep date-only values as `YYYY-MM-DD` strings with UTC date arithmetic. Do not add native `type="date"` controls or separate calendar implementations.
 
 ## State and forms
 

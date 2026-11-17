@@ -1,6 +1,5 @@
-import { REPORT_JOB_TOTAL } from '@/features/reports/fixtures/reportFixtures';
 import { Suspense } from 'react';
-import { DashboardAnalytics } from '@/features/dashboard';
+import { ReportsCharts } from '@/features/reports/components/ReportsCharts/ReportsCharts';
 import { ReportsToolbar } from '@/features/reports/components/ReportsToolbar/ReportsToolbar';
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton';
 export function ReportsPage() {
@@ -9,7 +8,7 @@ export function ReportsPage() {
       <Suspense fallback={<Skeleton className="h-24" />}>
         <ReportsToolbar />
       </Suspense>
-      <DashboardAnalytics jobTotal={REPORT_JOB_TOTAL} />
+      <ReportsCharts />
     </div>
   );
 }

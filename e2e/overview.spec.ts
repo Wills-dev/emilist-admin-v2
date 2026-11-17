@@ -106,7 +106,7 @@ for (const viewport of viewports) {
   });
 }
 
-test('sign-in button opens the preview without credentials or a session', async ({
+test('empty sign-in validates while the dashboard preview stays public', async ({
   page,
   context,
 }) => {
@@ -114,7 +114,9 @@ test('sign-in button opens the preview without credentials or a session', async 
   const signIn = page.getByRole('button', { name: 'Sign In', exact: true });
   await expect(signIn).toBeEnabled();
   await signIn.click();
-  await expect(page).toHaveURL('/dashboard');
+  await expect(page).toHaveURL('/login');
+  await expect(page.getByText('Enter your password.')).toBeVisible();
+  await page.goto('/dashboard');
   expect(await context.cookies()).toEqual([]);
   expect(await page.evaluate(() => localStorage.length)).toBe(0);
   await expect(page.getByRole('note')).toContainText(
