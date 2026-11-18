@@ -70,6 +70,30 @@ test('invitation populates decoded details and completes password, QR, and activ
   await expect(page.getByLabel('Create Password', { exact: true })).toHaveCount(
     0,
   );
+  // Empty code boxes must be discoverable before validation adds error borders.
+  const codeGroup = page.getByRole('group', {
+    name: 'Enter Verification Code',
+    exact: true,
+  });
+  await codeGroup.scrollIntoViewIfNeeded();
+  await expect(codeGroup.getByRole('alert')).toHaveCount(0);
+  const codeInputs = codeGroup.getByRole('textbox');
+  await expect(codeInputs).toHaveCount(6);
+  for (const input of await codeInputs.all()) {
+    await expect(input).toHaveValue('');
+    await expect(input).toBeInViewport();
+    const appearance = await input.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return {
+        borderColor: style.borderTopColor,
+        borderWidth: style.borderTopWidth,
+        backgroundColor: style.backgroundColor,
+      };
+    });
+    expect(parseFloat(appearance.borderWidth)).toBeGreaterThan(0);
+    expect(appearance.borderColor).not.toBe('rgba(0, 0, 0, 0)');
+    expect(appearance.borderColor).not.toBe(appearance.backgroundColor);
+  }
   await page.getByLabel('Verification digit 1', { exact: true }).fill('012345');
   await page
     .getByRole('button', { name: 'Activate Account & Sign In', exact: true })
