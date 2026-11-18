@@ -13,7 +13,8 @@ apiClient.interceptors.request.use((config) => {
   const loginRequest =
     !config.baseURL &&
     Object.values(ADMIN_AUTH_ROUTES).some((path) => path === config.url) &&
-    config.method === 'post';
+    (config.method === 'post' ||
+      (config.method === 'get' && config.url === ADMIN_AUTH_ROUTES.invitation));
   if (loginRequest) return config;
 
   throw new ApiError(

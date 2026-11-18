@@ -4,13 +4,17 @@ import { Button } from '@/components/ui/Button/Button';
 
 export function AuthActions({
   backHref,
+  onBack,
   backLabel = 'Back to Sign In',
+  backDisabled = false,
   submitLabel,
   unavailable,
   disabled = true,
 }: {
   backHref?: string;
+  onBack?: () => void;
   backLabel?: string;
+  backDisabled?: boolean;
   submitLabel?: string;
   unavailable?: string;
   disabled?: boolean;
@@ -18,16 +22,26 @@ export function AuthActions({
   return (
     <div className="mt-7 border-t border-neutral-100 pt-6">
       <div className="flex flex-col gap-3 sm:flex-row">
-        {backHref && (
+        {(backHref || onBack) && (
           <Button
-            asChild
+            asChild={!!backHref && !onBack}
+            type="button"
+            onClick={onBack}
+            disabled={backDisabled}
             variant="outline"
             className="flex-1 border-emerald-500 text-xs text-emerald-700 transition-colors duration-200 ease-out hover:border-emerald-600 hover:bg-emerald-50 focus-visible:ring-emerald-600 motion-reduce:transition-none"
           >
-            <Link href={backHref}>
-              <ChevronLeft />
-              {backLabel}
-            </Link>
+            {backHref && !onBack ? (
+              <Link href={backHref}>
+                <ChevronLeft />
+                {backLabel}
+              </Link>
+            ) : (
+              <>
+                <ChevronLeft />
+                {backLabel}
+              </>
+            )}
           </Button>
         )}
         {submitLabel && (

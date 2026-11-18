@@ -91,3 +91,21 @@ it('allows only confirmed authentication POSTs through same-origin handlers', as
   }
   expect(adapter).not.toHaveBeenCalled();
 });
+
+it('allows invitation inspection GETs while rejecting other administrative GETs', async () => {
+  const { apiClient } = await import('./apiClient');
+  const adapter = vi.fn().mockResolvedValue({
+    data: {},
+    status: 200,
+    statusText: 'OK',
+    headers: {},
+    config: {},
+  });
+  await apiClient.get('/api/admin-auth/invitation', { adapter });
+  expect(adapter).toHaveBeenCalledOnce();
+  adapter.mockClear();
+  await expect(
+    apiClient.get('/api/admin-auth/invitation/password', { adapter }),
+  ).rejects.toMatchObject({ code: 'configuration' });
+  expect(adapter).not.toHaveBeenCalled();
+});

@@ -31,8 +31,11 @@ export function proxy(request: NextRequest) {
   const authPost =
     request.method === 'POST' &&
     Object.values(ADMIN_AUTH_ROUTES).some((route) => route === path);
+  const invitationGet =
+    request.method === 'GET' && path === ADMIN_AUTH_ROUTES.invitation;
   const response =
     !authPost &&
+    !invitationGet &&
     (!['GET', 'HEAD'].includes(request.method) || (!page && !asset))
       ? NextResponse.json(
           { error: 'Unavailable in Demo Mode.' },

@@ -1,5 +1,9 @@
 'use client';
 import { ROUTES } from '@/constants/routes';
+import { toast } from 'sonner';
+import { ApiError } from '@/lib/api/apiError';
+import type { AuthAccount } from '@/features/auth/types/authTypes';
+import type { InvitationPasswordPayload } from '@/features/auth/schemas/invitationSchemas';
 import { useForm, useWatch } from 'react-hook-form';
 import { PasswordField } from '@/features/auth/components/PasswordField/PasswordField';
 import { PasswordRequirements } from '@/features/auth/components/PasswordRequirements/PasswordRequirements';
@@ -10,22 +14,58 @@ import {
   newPasswordSchema,
 } from '@/features/auth/schemas/authSchemas';
 
-export function NewPasswordForm({ reset = false }: { reset?: boolean }) {
+export function NewPasswordForm({
+  reset = false,
+  account,
+  submitPassword,
+  onBack,
+}: {
+  reset?: boolean;
+  account?: AuthAccount;
+  submitPassword?: (values: InvitationPasswordPayload) => Promise<void>;
+  onBack?: () => void;
+}) {
   const {
     register,
     control,
     getValues,
-    formState: { errors },
+    handleSubmit,
+    resetField,
+    setError,
+    clearErrors,
+    formState: { errors, isSubmitting },
   } = useForm<{ password: string; confirmPassword: string }>({
     mode: 'onChange',
     defaultValues: { password: '', confirmPassword: '' },
   });
   const password = useWatch({ control, name: 'password' });
+  async function onSubmit(values: InvitationPasswordPayload) {
+    if (!submitPassword || isSubmitting) return;
+    clearErrors('root');
+    try {
+      await submitPassword(values);
+      resetField('password');
+      resetField('confirmPassword');
+    } catch (error: unknown) {
+      if (error instanceof ApiError && error.code === 'cancelled') return;
+      const message =
+        error instanceof ApiError
+          ? error.message
+          : 'Unable to create your password. Please try again.';
+      setError('root', { message });
+      toast.error(message);
+    }
+  }
   return (
-    <form noValidate onSubmit={(event) => event.preventDefault()}>
+    <form
+      method="post"
+      noValidate
+      onSubmit={handleSubmit(onSubmit)}
+      aria-busy={isSubmitting}
+    >
       <div className="rounded-2xl border border-dashed border-neutral-100 bg-neutral-50/80 p-4 sm:mx-8">
         <div className="mb-6 border-b border-neutral-100">
-          <AuthAccountSummary />
+          <AuthAccountSummary account={account} />
         </div>
         <div className="space-y-4">
           <PasswordField
@@ -60,11 +100,30 @@ export function NewPasswordForm({ reset = false }: { reset?: boolean }) {
           />
         </div>
       </div>
+      {errors.root?.message && (
+        <p role="alert" className="mt-4 text-sm text-red-700">
+          {errors.root.message}
+        </p>
+      )}
       <AuthActions
-        backHref={reset ? ROUTES.login : ROUTES.acceptInvite}
+        onBack={isSubmitting ? undefined : onBack}
+        backHref={
+          onBack ? undefined : reset ? ROUTES.login : ROUTES.acceptInvite
+        }
         backLabel={reset ? 'Back to Sign In' : 'Back to Account Setup'}
-        submitLabel={reset ? 'Update Password' : 'Create Password'}
-        unavailable="Password changes are unavailable until account verification and the password service are connected."
+        submitLabel={
+          isSubmitting
+            ? 'Creating Password'
+            : reset
+              ? 'Update Password'
+              : 'Create Password'
+        }
+        disabled={!submitPassword || isSubmitting}
+        unavailable={
+          submitPassword
+            ? undefined
+            : 'Password changes are unavailable until account verification and the password service are connected.'
+        }
       />
     </form>
   );

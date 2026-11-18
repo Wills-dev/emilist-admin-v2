@@ -35,6 +35,16 @@ export function backendAuthError(body: unknown, status: number) {
       ? record.message.toLowerCase()
       : '';
   if (
+    message === 'invitation has expired. ask a super admin to send a new one' ||
+    status === 410
+  ) {
+    return new AuthServerError(
+      'This invitation has expired. Ask your inviter for a new link.',
+      410,
+      'invitation_expired',
+    );
+  }
+  if (
     [
       'challenge expired, please sign in again',
       'invalid challenge token',

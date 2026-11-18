@@ -8,7 +8,8 @@ import {
 // Never let browser fixtures reach the live authentication backend.
 test.beforeEach(async ({ page }) => {
   await page.route('**/api/admin-auth/**', (route) =>
-    route.request().url().endsWith('/logout')
+    route.request().url().endsWith('/logout') ||
+    route.request().url().endsWith('/invitation')
       ? route.continue()
       : route.abort(),
   );
@@ -176,8 +177,13 @@ test('sign-in submits credentials and reports rejected authentication', async ({
   await page.getByRole('link', { name: 'Back to Sign In' }).click();
   await page.getByRole('link', { name: 'Accept invite' }).click();
   await expect(page).toHaveURL('/accept-invite');
-  await page.getByRole('link', { name: /Password/ }).click();
-  await expect(page).toHaveURL('/accept-invite/password');
+  await expect(
+    page.getByRole('alert').filter({ hasText: 'Open the invitation link' }),
+  ).toBeVisible();
+  await page.goto('/accept-invite/password');
+  await expect(
+    page.getByRole('heading', { name: 'Create New Password' }),
+  ).toBeVisible();
 });
 
 test('password requirements and OTP interactions stay local', async ({

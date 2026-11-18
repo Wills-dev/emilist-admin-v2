@@ -1,5 +1,11 @@
-import { AuthScreen } from '@/features/auth/components/AuthScreen/AuthScreen';
+import { InvitationScreen } from '@/features/auth/components/InvitationScreen/InvitationScreen';
+import { parseInvitationLink } from '@/features/auth/lib/parseInvitationLink';
 
-export default function Page() {
-  return <AuthScreen screen="invite" />;
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const link = parseInvitationLink(await searchParams);
+  return <InvitationScreen link={link} />;
 }
