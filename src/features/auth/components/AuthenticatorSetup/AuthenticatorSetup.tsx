@@ -5,21 +5,29 @@ import QRCode from 'react-qr-code';
 import { toast } from 'sonner';
 import { AdminMfaForm } from '@/features/auth/components/AdminMfaForm/AdminMfaForm';
 import { Button } from '@/components/ui/Button/Button';
+import type { AuthenticatorDetails } from '@/features/auth/schemas/invitationSchemas';
 import type { AdminMfaEnrollment } from '@/features/auth/schemas/adminLoginResponseSchema';
 import { VerificationForm } from '@/features/auth/components/VerificationForm/VerificationForm';
 
 export function AuthenticatorSetup({
   enrollment,
+  invitation,
+  invitationId,
   onRestart,
+  onAuthenticated,
 }: {
   enrollment?: AdminMfaEnrollment;
+  invitation?: AuthenticatorDetails;
+  invitationId?: string;
   onRestart?: () => void;
+  onAuthenticated?: () => void;
 }) {
-  if (enrollment) {
-    const { authenticator } = enrollment;
+  const authenticator = enrollment?.authenticator ?? invitation;
+  if (authenticator) {
+    const secret = authenticator.secret;
     async function copySecret() {
       try {
-        await navigator.clipboard.writeText(authenticator.secret);
+        await navigator.clipboard.writeText(secret);
         toast.success('Secret key copied');
       } catch {
         toast.error('Unable to copy the key. Enter it manually.');
@@ -68,9 +76,12 @@ export function AuthenticatorSetup({
           or leaving clears these enrollment details.
         </p>
         <AdminMfaForm
-          mode="enrollment"
-          token={enrollment.enrollmentToken}
+          mode={invitation ? 'invitation' : 'enrollment'}
+          token={enrollment?.enrollmentToken}
+          invitationId={invitationId}
           onRestart={onRestart}
+          onAuthenticated={onAuthenticated}
+          backLabel={invitation ? 'Back to Account Setup' : undefined}
         />
       </section>
     );

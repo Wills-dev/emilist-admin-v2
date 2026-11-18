@@ -106,7 +106,7 @@ Use TanStack Query for remote data, Zustand for shared UI state, URL parameters 
 
 `src/lib/auth/session.ts` defines a server-only `SessionAdapter` interface and a `requirePermission` helper. `src/lib/auth/authorization.ts` provides an internal `AdminSession` model and permission checks that deny absent, invalid, or expired sessions. These utilities are not connected to a session backend. The dashboard server layout exposes public synthetic UI fixtures. This does not establish a session. Real protected data and actions must remain unavailable until a verified session adapter is implemented. Once connected, authenticated visitors to `/` or `/login` should be redirected to `/dashboard` using a verified server session.
 
-The `/unauthorized` and `/forbidden` routes provide presentation states; they do not enforce HTTP authorization. Login, MFA verification/enrollment, and local cookie logout are connected. Invitation onboarding, password reset, email delivery, and password changes remain preview-only.
+The `/unauthorized` and `/forbidden` routes provide presentation states; they do not enforce HTTP authorization. Login, MFA verification/enrollment, and local cookie logout are connected. Invitation acceptance, password creation, and authenticator activation are connected. Password reset, invitation delivery, and general password changes remain preview-only.
 
 Protected functionality requires a backend session adapter that verifies server-managed HttpOnly, Secure, SameSite cookies and maps authoritative permissions into the internal session model. Enforce authorization close to server data access and actions, with independent enforcement by backend APIs. UI visibility checks are supplemental. Never store sensitive tokens in localStorage.
 
@@ -114,18 +114,18 @@ Authentication handlers require same-origin JSON POSTs and reject cross-site req
 
 ## Authentication UI
 
-| Routes                                      | Interface                                          |
-| ------------------------------------------- | -------------------------------------------------- |
-| `/login`, `/login/verify`                   | Sign-in and authenticator-code entry               |
-| `/accept-invite`                            | Read-only invitation details awaiting backend data |
-| `/accept-invite/password`                   | Password creation and confirmation                 |
-| `/accept-invite/authenticator`              | Authenticator enrollment layout and code entry     |
-| `/forgot-password`, `/forgot-password/sent` | Recovery request and delivery-status view          |
-| `/reset-password/verify`, `/reset-password` | Recovery code entry and password reset             |
+| Routes                                      | Interface                                                            |
+| ------------------------------------------- | -------------------------------------------------------------------- |
+| `/login`, `/login/verify`                   | Sign-in and authenticator-code entry                                 |
+| `/accept-invite`                            | Verified invitation, password creation, and authenticator activation |
+| `/accept-invite/password`                   | Password creation and confirmation                                   |
+| `/accept-invite/authenticator`              | Authenticator enrollment layout and code entry                       |
+| `/forgot-password`, `/forgot-password/sent` | Recovery request and delivery-status view                            |
+| `/reset-password/verify`, `/reset-password` | Recovery code entry and password reset                               |
 
 Forms support local email/password validation, password visibility, live password requirements, confirmation matching, and six-digit code entry with paste and keyboard navigation. Account setup steps link between UI views without saving or verifying data. The shared authentication layout uses the supplied SVG assets and hides the illustration panel on small screens. It occupies the dynamic viewport height: the header and illustration remain stationary while only the form panel scrolls.
 
-Other backend-dependent actions remain disabled even when local fields are valid. The dashboard preview uses static UI fixtures; login submits to the supplied backend endpoint. The delivery-status view does not claim an email was sent. Login enrollment renders the backend-provided URI as a local QR code and offers the returned manual key. MFA verification establishes the HttpOnly session before navigating to the dashboard. Invitation-specific enrollment remains unavailable without its own integration. Password requirements are UI validation rules and must be reconciled with the backend policy during integration.
+Other backend-dependent actions remain disabled even when local fields are valid. The dashboard preview uses static UI fixtures; login submits to the supplied backend endpoint. The delivery-status view does not claim an email was sent. Login enrollment renders the backend-provided URI as a local QR code and offers the returned manual key. MFA verification establishes the HttpOnly session before navigating to the dashboard. Invitation enrollment is connected through the verified accept-invite flow. Password requirements are UI validation rules and must be reconciled with the backend policy during integration.
 
 ## Public UI preview
 
@@ -293,13 +293,55 @@ Only a validated successful MFA response for an active, MFA-enabled admin sets
 the seven-day `emilist_admin_token` HttpOnly cookie. The bearer token is stripped
 from browser JSON. Server requests are bounded, uncached, and do not follow
 redirects; request bodies, origins, modes, and response schemas are validated.
-Sensitive values never go to localStorage, sessionStorage, URLs, logs, external
-QR services, or fixture data. The final admin response is not used to infer
+Access tokens, passwords, MFA codes, and setup secrets never go to localStorage,
+sessionStorage, URLs, logs, external QR services, or fixture data. Incoming
+invitation tokens are removed from the address bar after verification. The final admin response is not used to infer
 permissions or enable protected operations.
 
 The dashboard remains a public synthetic fixture preview in all environments,
 including after sign-in. Its displayed profile is a fixture, not the signed-in
 admin. A server-validated session adapter and backend authorization are still
 required before enabling private records or administrative operations.
-Invitation onboarding and password reset are separate integrations and remain
-preview-only; the login endpoints are never reused for those token purposes.
+Invitation onboarding uses its own verified endpoints and token purpose.
+Password reset remains preview-only; login endpoints are never reused for reset
+tokens.
+
+### Accepting an administrator invitation
+
+Open the supplied `/accept-invite?token=...&fullName=...&email=...&role=...&invitedBy=...`
+link. Query parameters are decoded once, preserving literal plus signs in email
+addresses. Full name, role, and inviter are bounded display hints, never
+permissions. Backend invitation inspection verifies the token and supplies the
+authoritative email before Proceed becomes available. Invalid, missing, or
+expired tokens cannot create passwords or activate an account.
+
+On successful inspection, the server stores the invitation token in a host-only,
+HttpOnly, SameSite=Lax cookie (Secure in production), bounded by the returned
+expiry and the confirmed 48-hour invitation lifetime. A non-secret flow ID
+binds password, setup, and activation requests to that invitation, so a stale
+tab cannot act on a different invitation cookie. The browser removes the
+token from the URL and retains the display parameters. Refreshing inspects the
+cookie again; the backend's `nextStep` determines whether to create a password
+or resume authenticator setup. The old direct password/authenticator routes
+remain UI previews; the connected workflow stays on `/accept-invite`.
+
+| Browser handler                            | Backend request, relative to `EMILIST_API_URL`  |
+| ------------------------------------------ | ----------------------------------------------- |
+| `POST /api/admin-auth/invitation`          | `GET /admin/onboarding/invitation/{token}`      |
+| `GET /api/admin-auth/invitation`           | Same inspection using the private cookie        |
+| `POST /api/admin-auth/invitation/password` | `POST /admin/onboarding/password`               |
+| `POST /api/admin-auth/invitation/setup`    | `POST /admin/onboarding/authenticator/setup`    |
+| `POST /api/admin-auth/invitation/activate` | `POST /admin/onboarding/authenticator/activate` |
+
+The backend base already includes `/api/v1`; the endpoint paths do not repeat
+that prefix. Password creation sends the verified invitation token, password,
+and confirmation upstream, then displays the returned authenticator URI locally
+as a QR code and offers the manual key. Password rules require at least twelve
+characters, mixed case, a number, a symbol, and matching confirmation. Backend
+password-history validation remains authoritative. Activation sends the same
+invitation token with the six-digit string code, validates the final admin
+response, sets the seven-day HttpOnly session cookie, clears the invitation
+cookie and setup state, and opens the synthetic dashboard. Neither the final
+access token nor the private invitation cookie value is returned in browser
+JSON. TanStack Query owns remote state; mutations do not retry automatically,
+duplicate submissions are disabled, and Sonner reports real results and errors.

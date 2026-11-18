@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ROUTES } from '@/constants/routes';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/Button/Button';
+import { AuthActions } from '@/features/auth/components/AuthActions/AuthActions';
 import { OtpInput } from '@/features/auth/components/OtpInput/OtpInput';
 import { otpSchema } from '@/features/auth/schemas/authSchemas';
 import {
@@ -16,15 +16,21 @@ import { ApiError } from '@/lib/api/apiError';
 
 export function AdminMfaForm({
   mode,
-  token,
+  token = '',
+  invitationId,
   onRestart,
+  onAuthenticated = onRestart,
+  backLabel = 'Back to Sign In',
 }: {
   mode: AdminMfaMode;
-  token: string;
+  token?: string;
+  invitationId?: string;
   onRestart?: () => void;
+  onAuthenticated?: () => void;
+  backLabel?: string;
 }) {
   const router = useRouter();
-  const verification = useAdminMfa(mode);
+  const verification = useAdminMfa(mode, invitationId);
   const [invalidAttempts, setInvalidAttempts] = useState(0);
   const [responseReceived, setResponseReceived] = useState(false);
   const {
@@ -41,19 +47,31 @@ export function AdminMfaForm({
   const pending = isSubmitting || verification.isPending;
 
   async function onSubmit({ code }: { code: string }) {
-    if (verification.isPending || responseReceived || !token) return;
+    if (
+      verification.isPending ||
+      responseReceived ||
+      (!token && mode !== 'invitation') ||
+      (mode === 'invitation' && !invitationId)
+    )
+      return;
     clearErrors('root');
     try {
       await verification.mutateAsync({ token, code });
       resetField('code');
       setResponseReceived(true);
       toast.success('Signed in successfully');
-      onRestart?.();
+      onAuthenticated?.();
       router.replace(ROUTES.dashboard);
       router.refresh();
     } catch (error: unknown) {
       if (error instanceof ApiError && error.code === 'cancelled') return;
-      if (error instanceof ApiError && error.code === 'flow_expired') {
+      if (
+        error instanceof ApiError &&
+        (error.code === 'flow_expired' ||
+          error.code === 'invitation_expired' ||
+          error.code === 'invitation_missing' ||
+          error.code === 'invitation_changed')
+      ) {
         resetField('code');
         onRestart?.();
         toast.error(error.message);
@@ -117,25 +135,26 @@ export function AdminMfaForm({
           Sign-in complete. Opening the dashboard.
         </p>
       )}
-      <div className="flex flex-wrap gap-3">
-        <Button type="submit" disabled={pending || responseReceived || !token}>
-          {pending
+      <AuthActions
+        onBack={onRestart}
+        backLabel={backLabel}
+        backDisabled={pending}
+        disabled={
+          pending ||
+          responseReceived ||
+          (!token && mode !== 'invitation') ||
+          (mode === 'invitation' && !invitationId)
+        }
+        submitLabel={
+          pending
             ? 'Verifying'
-            : mode === 'enrollment'
-              ? 'Confirm Enrollment'
-              : 'Verify Code'}
-        </Button>
-        {onRestart && (
-          <Button
-            type="button"
-            variant="outline"
-            disabled={pending}
-            onClick={onRestart}
-          >
-            Back to Sign In
-          </Button>
-        )}
-      </div>
+            : mode === 'invitation'
+              ? 'Activate Account & Sign In'
+              : mode === 'enrollment'
+                ? 'Confirm Enrollment'
+                : 'Verify Code'
+        }
+      />
     </form>
   );
 }

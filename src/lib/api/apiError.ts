@@ -4,6 +4,9 @@ export class ApiError extends Error {
   constructor(
     message: string,
     public readonly code:
+      | 'invitation_changed'
+      | 'invitation_missing'
+      | 'invitation_expired'
       | 'flow_expired'
       | 'invalid_code'
       | 'unauthorized'
@@ -29,6 +32,24 @@ export function normalizeApiError(error: unknown): ApiError {
     const status = error.response?.status;
     const data: unknown = error.response?.data;
     if (data && typeof data === 'object' && 'code' in data) {
+      if (data.code === 'invitation_changed')
+        return new ApiError(
+          'A different invitation is open in this browser. Reopen your original invitation link.',
+          'invitation_changed',
+          status,
+        );
+      if (data.code === 'invitation_missing')
+        return new ApiError(
+          'Open the invitation link sent by your administrator to continue.',
+          'invitation_missing',
+          status,
+        );
+      if (data.code === 'invitation_expired')
+        return new ApiError(
+          'This invitation has expired. Ask your inviter for a new link.',
+          'invitation_expired',
+          status,
+        );
       if (data.code === 'flow_expired')
         return new ApiError(
           'Your sign-in challenge expired. Please sign in again.',

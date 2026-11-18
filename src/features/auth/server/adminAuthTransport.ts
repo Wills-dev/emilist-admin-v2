@@ -3,11 +3,32 @@ import { getAuthServerEnv } from '@/config/authServerEnv';
 import { ADMIN_AUTH_ENDPOINTS } from '@/config/adminAuth';
 import { AuthServerError, backendAuthError } from './authServerError';
 
-type AuthEndpoint =
+type FixedAuthEndpoint =
   (typeof ADMIN_AUTH_ENDPOINTS)[keyof typeof ADMIN_AUTH_ENDPOINTS];
 
-export async function postAdminAuth(
+type AuthEndpoint =
+  FixedAuthEndpoint | `${typeof ADMIN_AUTH_ENDPOINTS.invitation}/${string}`;
+
+export function postAdminAuth(
+  endpoint: FixedAuthEndpoint,
+  payload: unknown,
+  signal: AbortSignal,
+) {
+  return requestAdminAuth(endpoint, 'POST', payload, signal);
+}
+
+export function getAdminInvitation(token: string, signal: AbortSignal) {
+  return requestAdminAuth(
+    `${ADMIN_AUTH_ENDPOINTS.invitation}/${encodeURIComponent(token)}`,
+    'GET',
+    undefined,
+    signal,
+  );
+}
+
+async function requestAdminAuth(
   endpoint: AuthEndpoint,
+  method: 'GET' | 'POST',
   payload: unknown,
   signal: AbortSignal,
 ): Promise<unknown> {
@@ -28,12 +49,12 @@ export async function postAdminAuth(
   let response: Response;
   try {
     response = await fetch(`${settings.apiUrl.replace(/\/$/, '')}${endpoint}`, {
-      method: 'POST',
+      method,
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
       },
-      body: JSON.stringify(payload),
+      body: method === 'POST' ? JSON.stringify(payload) : undefined,
       cache: 'no-store',
       redirect: 'error',
       signal: upstreamSignal,

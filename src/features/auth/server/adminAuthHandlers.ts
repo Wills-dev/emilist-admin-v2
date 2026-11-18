@@ -1,7 +1,6 @@
 import 'server-only';
 import { ADMIN_AUTH_ENDPOINTS } from '@/config/adminAuth';
 import { adminLoginResponseSchema } from '@/features/auth/schemas/adminLoginResponseSchema';
-import { backendAdminSessionSchema } from '@/features/auth/schemas/adminSessionSchema';
 import {
   adminLoginRequestSchema,
   adminVerificationRequestSchema,
@@ -14,14 +13,12 @@ import {
   AuthServerError,
 } from './authServerError';
 
-const SESSION_COOKIE = 'emilist_admin_token';
-const SEVEN_DAYS_SECONDS = 7 * 24 * 60 * 60;
-const cookieOptions = () => ({
-  httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'lax' as const,
-  path: '/',
-});
+import {
+  SESSION_COOKIE,
+  INVITATION_COOKIE,
+  authCookieOptions,
+  createAdminSessionResponse,
+} from './adminSessionResponse';
 
 export async function handleAdminLogin(request: Request) {
   try {
@@ -70,22 +67,7 @@ export async function handleAdminVerification(request: Request) {
         : { challengeToken: flowToken, code },
       request.signal,
     );
-    const session = backendAdminSessionSchema.safeParse(body);
-    if (!session.success)
-      throw new AuthServerError(
-        'Invalid verification response.',
-        502,
-        'server',
-      );
-    const response = authJson({
-      message: 'success',
-      data: { admin: session.data.data.admin },
-    });
-    response.cookies.set(SESSION_COOKIE, session.data.data.token, {
-      ...cookieOptions(),
-      maxAge: SEVEN_DAYS_SECONDS,
-    });
-    return response;
+    return createAdminSessionResponse(body);
   } catch (error: unknown) {
     return authErrorResponse(error);
   }
@@ -95,7 +77,14 @@ export async function handleAdminLogout(request: Request) {
   try {
     await readAuthRequest(request);
     const response = authJson({ message: 'success' });
-    response.cookies.set(SESSION_COOKIE, '', { ...cookieOptions(), maxAge: 0 });
+    response.cookies.set(SESSION_COOKIE, '', {
+      ...authCookieOptions(),
+      maxAge: 0,
+    });
+    response.cookies.set(INVITATION_COOKIE, '', {
+      ...authCookieOptions(),
+      maxAge: 0,
+    });
     return response;
   } catch (error: unknown) {
     return authErrorResponse(error);
