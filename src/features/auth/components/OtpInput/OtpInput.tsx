@@ -79,7 +79,9 @@ export function OtpInput({
               }
             }}
             className={cn(
-              'h-12 w-full max-w-12 min-w-0 rounded-xl border border-transparent bg-white text-center text-xl font-medium outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 aria-invalid:border-red-600',
+              'h-12 w-full max-w-12 min-w-0 rounded-xl border border-neutral-500 bg-white',
+              'text-center text-xl font-medium outline-none focus-visible:ring-2',
+              'focus-visible:ring-emerald-600 aria-invalid:border-red-600',
               value[index]?.trim() && 'border-green-500',
               index === 3 && 'ml-2 sm:ml-4',
             )}
