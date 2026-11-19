@@ -1,3 +1,4 @@
+import type { DashboardDate } from '@/lib/date/getDashboardDate';
 import type { DashboardProfile } from '@/types/DashboardProfile';
 import type { ReactNode } from 'react';
 import { DashboardSidebar } from '@/components/organisms/DashboardSidebar/DashboardSidebar';
@@ -9,13 +10,17 @@ export function DashboardLayout({
   date,
   accountMenu,
   signOutAction,
+  sidebarProfile,
+  statusBadge,
 }: {
   children: ReactNode;
   demoMode?: boolean;
   profile: DashboardProfile;
-  date: string;
+  date: DashboardDate;
   accountMenu?: ReactNode;
   signOutAction?: ReactNode;
+  sidebarProfile?: ReactNode;
+  statusBadge?: ReactNode;
 }) {
   return (
     <div className="relative flex h-dvh max-h-dvh flex-col overflow-hidden bg-[#f5f7f5] text-[#343b36]">
@@ -27,12 +32,17 @@ export function DashboardLayout({
       </a>
       <DashboardHeader
         demoMode={demoMode}
+        statusBadge={statusBadge}
         date={date}
         initials={profile.initials}
         accountMenu={accountMenu}
       />
       <div className="flex min-h-0 flex-1 overflow-hidden">
-        <DashboardSidebar profile={profile} signOutAction={signOutAction} />
+        <DashboardSidebar
+          profile={profile}
+          signOutAction={signOutAction}
+          profileContent={sidebarProfile}
+        />
         <main
           id="main-content"
           tabIndex={0}

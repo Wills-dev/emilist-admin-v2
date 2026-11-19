@@ -2,7 +2,9 @@
 
 import { useEffect, useRef } from 'react';
 import { ApiError } from '@/lib/api/apiError';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { CURRENT_USER_QUERY_KEY } from '@/features/auth/lib/authQueryKeys';
+import { useCurrentUserStore } from '@/features/auth/hooks/useCurrentUserStore/useCurrentUserStore';
 import { activateInvitation } from '@/features/auth/api/adminInvitation';
 import { enrollAdminMfa, verifyAdminMfa } from '@/features/auth/api/adminMfa';
 
@@ -15,6 +17,8 @@ interface AdminMfaSubmission {
 }
 
 export function useAdminMfa(mode: AdminMfaMode, invitationId?: string) {
+  const client = useQueryClient();
+  const clearUser = useCurrentUserStore((state) => state.clearUser);
   const pending = useRef<AbortController | null>(null);
   useEffect(() => () => pending.current?.abort(), []);
   return useMutation({
@@ -29,6 +33,11 @@ export function useAdminMfa(mode: AdminMfaMode, invitationId?: string) {
       if (controller.signal.aborted)
         throw new ApiError('Request cancelled.', 'cancelled');
       return response;
+    },
+    onSuccess: async () => {
+      clearUser();
+      await client.cancelQueries({ queryKey: CURRENT_USER_QUERY_KEY });
+      client.removeQueries({ queryKey: CURRENT_USER_QUERY_KEY });
     },
     retry: false,
     gcTime: 0,

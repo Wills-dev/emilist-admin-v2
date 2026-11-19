@@ -3,18 +3,26 @@ import Image from 'next/image';
 import type { ReactNode } from 'react';
 import { Bell, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/Button/Button';
+import { useDashboardDate } from '@/hooks/useDashboardDate/useDashboardDate';
+import {
+  DASHBOARD_TIME_ZONE,
+  type DashboardDate,
+} from '@/lib/date/getDashboardDate';
 import { useSidebarStore } from '@/hooks/useSidebarStore/useSidebarStore';
 export function DashboardHeader({
   demoMode = false,
   date,
   initials,
   accountMenu,
+  statusBadge,
 }: {
   demoMode?: boolean;
-  date: string;
+  date: DashboardDate;
   initials: string;
   accountMenu?: ReactNode;
+  statusBadge?: ReactNode;
 }) {
+  const today = useDashboardDate(date);
   const { open, setOpen } = useSidebarStore();
   return (
     <header className="flex h-18 shrink-0 items-center justify-between gap-3 border-b border-[#f0f2f0] bg-white px-4 sm:px-8">
@@ -39,14 +47,20 @@ export function DashboardHeader({
           priority
           className={demoMode ? 'h-auto w-20 sm:w-36' : 'h-auto w-28 sm:w-36'}
         />
-        <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] whitespace-nowrap text-emerald-800">
-          {demoMode ? 'Demo Mode' : 'Admin'}
-        </span>
+        {statusBadge ?? (
+          <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] whitespace-nowrap text-emerald-800">
+            {demoMode ? 'Demo Mode' : 'Admin'}
+          </span>
+        )}
       </div>
       <div className="flex shrink-0 items-center gap-4 sm:gap-6">
-        <span className="hidden rounded-full bg-neutral-50 px-4 py-1 text-xs text-[#66728b] sm:inline">
-          {date} <span className="sr-only">(sample date)</span>
-        </span>
+        <time
+          dateTime={today.dateTime}
+          title={`Current date (${DASHBOARD_TIME_ZONE})`}
+          className="hidden rounded-full bg-neutral-50 px-4 py-1 text-xs text-[#66728b] sm:inline"
+        >
+          {today.label}
+        </time>
         <button
           type="button"
           disabled

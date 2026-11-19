@@ -94,7 +94,7 @@ See [AGENTS.md](AGENTS.md) for the complete engineering conventions.
 
 ## API and state management
 
-`src/lib/api/apiClient.ts` centralizes browser requests with a bounded timeout, same-origin authentication route allowlist, credentials, and safe error normalization. Feature API functions own requests and hooks own TanStack Query mutations. Only login, verification, and local logout are enabled; arbitrary administrative API transport stays blocked. Server-only authentication services validate and forward the confirmed backend requests. Raw backend errors and final access tokens are never returned to browser JavaScript.
+`src/lib/api/apiClient.ts` centralizes browser requests with a bounded timeout, same-origin authentication route allowlist, credentials, and safe error normalization. Feature API functions own requests and hooks own TanStack Query mutations. Only login, verification, and local logout are enabled; arbitrary administrative API transport stays blocked. Server-only authentication services validate and forward the confirmed backend requests. Raw backend errors and final access tokens are never returned to browser JavaScript. The current-user identity endpoint is also enabled through its authenticated same-origin handler.
 
 Feature service functions own API calls and typed contracts; dedicated feature hooks own TanStack Query integration. Presentation components do not call Axios directly. Services must use confirmed backend endpoints and contracts, support `AbortSignal`, and validate response shapes where appropriate.
 
@@ -213,7 +213,7 @@ Set public environment values before building. `npm start` serves the generated 
 
 Use the Next.js framework preset, Node.js 24.x, install command `npm ci`, build command `npm run build`, and the default output directory. No project/team IDs, hostname allowlists, OIDC configuration, or preview flags are required. Existing values for those retired settings are ignored and may be removed from Vercel. `npm run build:demo` and `npm run start:demo` remain aliases for the normal commands.
 
-All deployments expose the same public synthetic fixture dashboard. Sign In submits entered credentials to the configured backend; it establishes an HttpOnly session only after successful MFA verification. Direct dashboard routes and refreshes work without deployment restrictions. The persistent Demo Mode badge identifies the interface as a demonstration. Administrative transport other than the three same-origin authentication handlers, server-action POSTs, and exports remains blocked; backend-dependent controls remain disabled. CSP restricts production browser connections to the frontend origin; server routes contact the configured backend. Integrate real server authentication and backend authorization before enabling private records or administrative operations.
+All deployments expose the same public synthetic fixture dashboard. Sign In submits entered credentials to the configured backend; it establishes an HttpOnly session only after successful MFA verification. Direct dashboard routes and refreshes work without deployment restrictions. The persistent Demo Mode badge identifies the interface as a demonstration. Administrative transport other than the explicit same-origin authentication and identity handlers, server-action POSTs, and exports remains blocked; backend-dependent controls remain disabled. CSP restricts production browser connections to the frontend origin; server routes contact the configured backend. Integrate real server authentication and backend authorization before enabling private records or administrative operations.
 
 ### Job details
 
@@ -299,8 +299,8 @@ invitation tokens are removed from the address bar after verification. The final
 permissions or enable protected operations.
 
 The dashboard remains a public synthetic fixture preview in all environments,
-including after sign-in. Its displayed profile is a fixture, not the signed-in
-admin. A server-validated session adapter and backend authorization are still
+including after sign-in. Its data and profile page remain fixtures. After login, the header and sidebar
+identity come from the validated current-user endpoint. A server-validated session adapter and backend authorization are still
 required before enabling private records or administrative operations.
 Invitation onboarding uses its own verified endpoints and token purpose.
 Password reset remains preview-only; login endpoints are never reused for reset
@@ -345,3 +345,65 @@ cookie and setup state, and opens the synthetic dashboard. Neither the final
 access token nor the private invitation cookie value is returned in browser
 JSON. TanStack Query owns remote state; mutations do not retry automatically,
 duplicate submissions are disabled, and Sonner reports real results and errors.
+
+### Current-user session and identity
+
+The session token remains in the server-managed `emilist_admin_token` HttpOnly,
+Secure-in-production, SameSite=Lax cookie. No browser cookie library is needed.
+`GET /api/admin-auth/current-user` reads this cookie server-side and forwards
+`Authorization: Bearer ...` to the supplied `GET /admin/current-user` endpoint.
+The backend validates the session on each request. Missing sessions and
+confirmed backend 401 responses clear the cookie and return a safe 401;
+malformed profile responses fail closed. Responses use `private, no-store`.
+The browser never receives the token in JSON or JavaScript-accessible storage.
+
+**Contract limitation:** a current-user response sample has not yet been
+supplied. The provisional adapter in
+`src/features/auth/schemas/currentUserSchema.ts` validates the previously supplied
+MFA admin fields and accepts either `data.admin` or direct `data` envelopes.
+Unexpected shapes show a recoverable profile error; they never create a user
+or grant permissions. Tighten this adapter when the actual response is supplied.
+
+TanStack Query owns the single current-user request, freshness, cancellation,
+focus/reconnect revalidation, and bounded transient retries. Per the requested
+identity-store design, the validated user is copied into a provider-scoped,
+non-persisted Zustand store. Other client components can consume
+`useCurrentUserStore` within `AppProviders`. This is an intentional identity UI
+snapshot, not a second request/cache implementation. No token is stored there,
+and mutating the snapshot cannot mutate Query's cached object. Logout,
+successful account changes, confirmed session expiry, and leaving the workspace
+clear the snapshot. Session rejection also cancels and clears queries marked
+`meta.private`, while preserving public fixture queries.
+
+The header and sidebar use localized avatar/name skeletons during initial
+loading. Background refresh retains the verified name and shows a small status
+indicator. Recoverable errors provide a local retry action; a confirmed 401
+returns to sign-in with one toast. Ordinary errors and other features' 401s do
+not trigger a blanket redirect. Anonymous users still see the public synthetic
+preview without a current-user request. Cookie presence only starts validation;
+it never establishes identity or grants access.
+
+Page transitions keep the shell visible and use content-shaped skeletons.
+Specific fallbacks cover Overview, customer details and activity/subscription
+views, permissions tables, and the password form, alongside the existing
+feature-owned route skeletons. Shared dashboard components accept identity UI
+slots and do not import authentication services or hooks. Other dashboard
+records remain synthetic and administrative operations remain disabled.
+
+### Header identity, date, and long addresses
+
+The logo badge displays Admin only after the current-user response is validated.
+An account being checked or unavailable displays Account; anonymous fixture
+previews retain Demo Mode. This badge does not grant administrative permissions.
+Existing content notices continue to identify synthetic records.
+
+The header uses the actual calendar date in Africa/Lagos, not the Overview
+fixture date. Its semantic `time` element includes an ISO date. A shared UI hook
+updates at minute boundaries, including midnight, and when a background tab is
+focused or becomes visible again. It preserves the server-rendered date during
+hydration and does not refetch business data.
+
+Long sidebar emails remain single-line ellipses within the available width. The
+full address stays in the DOM, is exposed on hover and as the profile link's
+accessible description, and wraps in the account dropdown for mobile users.
+No characters are removed from the stored address.
