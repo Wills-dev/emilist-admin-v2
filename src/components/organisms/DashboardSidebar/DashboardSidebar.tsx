@@ -37,9 +37,11 @@ const itemClass =
 export function DashboardSidebar({
   profile,
   signOutAction,
+  profileContent,
 }: {
   profile: DashboardProfile;
   signOutAction?: ReactNode;
+  profileContent?: ReactNode;
 }) {
   const { open, setOpen } = useSidebarStore();
   const pathname = usePathname();
@@ -133,24 +135,26 @@ export function DashboardSidebar({
             </Link>
           )}
         </nav>
-        <Link
-          href={ROUTES.profile}
-          aria-label="View profile"
-          onClick={() => setOpen(false)}
-          className="flex items-center gap-3 rounded border-t border-[#f0f2f0] pt-5 focus-visible:outline-2 focus-visible:outline-emerald-600"
-        >
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#727987] text-xs text-white">
-            {profile.initials}
-          </span>
-          <div className="min-w-0">
-            <p className="truncate text-xs text-[#26332a]">
-              {profile.displayName}
-            </p>
-            <p className="mt-1 text-[10px] text-[#7a827c]">
-              {profile.role} · Sample profile
-            </p>
-          </div>
-        </Link>
+        {profileContent ?? (
+          <Link
+            href={ROUTES.profile}
+            aria-label="View profile"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-3 rounded border-t border-[#f0f2f0] pt-5 focus-visible:outline-2 focus-visible:outline-emerald-600"
+          >
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#727987] text-xs text-white">
+              {profile.initials}
+            </span>
+            <div className="min-w-0">
+              <p className="truncate text-xs text-[#26332a]">
+                {profile.displayName}
+              </p>
+              <p className="mt-1 text-[10px] text-[#7a827c]">
+                {profile.role} · Sample profile
+              </p>
+            </div>
+          </Link>
+        )}
       </div>
     </>
   );

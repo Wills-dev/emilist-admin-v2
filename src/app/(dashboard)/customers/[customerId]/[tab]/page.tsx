@@ -7,7 +7,7 @@ import {
   CustomerActivitySection,
   type CustomerActivityKind,
 } from '@/features/customers/components/CustomerActivitySection/CustomerActivitySection';
-import { CustomerSkeleton } from '@/features/customers/components/CustomerSkeleton/CustomerSkeleton';
+import { CustomerTabSkeleton } from '@/features/customers/components/CustomerTabSkeleton/CustomerTabSkeleton';
 export default async function Page({
   params,
 }: {
@@ -21,12 +21,12 @@ export default async function Page({
   if (key === 'services') return <CustomerServices customerId={customerId} />;
   if (key === 'subscriptions')
     return (
-      <Suspense fallback={<CustomerSkeleton />}>
+      <Suspense fallback={<CustomerTabSkeleton tab={tab} />}>
         <CustomerSubscriptions customerId={customerId} />
       </Suspense>
     );
   return (
-    <Suspense fallback={<CustomerSkeleton />}>
+    <Suspense fallback={<CustomerTabSkeleton tab={tab} />}>
       <CustomerActivitySection
         customerId={customerId}
         kind={key as CustomerActivityKind}

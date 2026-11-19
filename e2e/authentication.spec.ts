@@ -13,6 +13,9 @@ test.beforeEach(async ({ page }) => {
       ? route.continue()
       : route.abort(),
   );
+  await page.route('**/api/admin-auth/current-user', (route) =>
+    route.fulfill({ json: ADMIN_MFA_RESPONSE_FIXTURE }),
+  );
 });
 
 const routes = [

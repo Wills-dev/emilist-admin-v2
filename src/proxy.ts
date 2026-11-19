@@ -30,9 +30,13 @@ export function proxy(request: NextRequest) {
     path === '/favicon.ico';
   const authPost =
     request.method === 'POST' &&
+    path !== ADMIN_AUTH_ROUTES.currentUser &&
     Object.values(ADMIN_AUTH_ROUTES).some((route) => route === path);
   const invitationGet =
-    request.method === 'GET' && path === ADMIN_AUTH_ROUTES.invitation;
+    request.method === 'GET' &&
+    [ADMIN_AUTH_ROUTES.invitation, ADMIN_AUTH_ROUTES.currentUser].some(
+      (route) => route === path,
+    );
   const response =
     !authPost &&
     !invitationGet &&

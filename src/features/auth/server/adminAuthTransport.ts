@@ -26,11 +26,22 @@ export function getAdminInvitation(token: string, signal: AbortSignal) {
   );
 }
 
+export function getAdminCurrentUser(token: string, signal: AbortSignal) {
+  return requestAdminAuth(
+    ADMIN_AUTH_ENDPOINTS.currentUser,
+    'GET',
+    undefined,
+    signal,
+    token,
+  );
+}
+
 async function requestAdminAuth(
   endpoint: AuthEndpoint,
   method: 'GET' | 'POST',
   payload: unknown,
   signal: AbortSignal,
+  bearerToken?: string,
 ): Promise<unknown> {
   let settings: ReturnType<typeof getAuthServerEnv>;
   try {
@@ -53,6 +64,7 @@ async function requestAdminAuth(
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
+        ...(bearerToken ? { Authorization: `Bearer ${bearerToken}` } : {}),
       },
       body: method === 'POST' ? JSON.stringify(payload) : undefined,
       cache: 'no-store',

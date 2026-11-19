@@ -109,3 +109,17 @@ it('allows invitation inspection GETs while rejecting other administrative GETs'
   ).rejects.toMatchObject({ code: 'configuration' });
   expect(adapter).not.toHaveBeenCalled();
 });
+
+it('allows only GET current-user requests through the same-origin session handler', async () => {
+  const { apiClient } = await import('./apiClient');
+  const adapter = vi
+    .fn()
+    .mockResolvedValue({ data: {}, status: 200, headers: {}, config: {} });
+  await apiClient.get('/api/admin-auth/current-user', { adapter });
+  expect(adapter).toHaveBeenCalledOnce();
+  adapter.mockClear();
+  await expect(
+    apiClient.post('/api/admin-auth/current-user', {}, { adapter }),
+  ).rejects.toMatchObject({ code: 'configuration' });
+  expect(adapter).not.toHaveBeenCalled();
+});
