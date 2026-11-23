@@ -11,12 +11,16 @@ export function getTicketDetail(id: string): TicketDetail | undefined {
   const featured = ticket.id === 'demo-record-74-001';
   return {
     ticket,
+    description: '',
     ...(featured ? { customerId: 'demo-customer-001' } : {}),
     openedTime: '11:49:40',
     team: featured ? 'Demo Finance Team' : 'Not supplied',
     notes: featured
       ? 'Synthetic admin note: review the supplied sample reference before updating the customer. No account or payment has been inspected by this preview.'
       : 'No admin note has been supplied for this sample.',
+    resolution: undefined,
+    resolvedAt: undefined,
+    resolvedBy: undefined,
     attachments: featured
       ? [
           'Wallet screenshot',

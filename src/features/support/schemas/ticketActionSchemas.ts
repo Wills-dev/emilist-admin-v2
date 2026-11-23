@@ -1,8 +1,6 @@
 import { z } from 'zod';
-import { DEMO_TEAMS } from '@/features/support/fixtures/ticketDetailFixtures';
-// UI drafts only. Teams do not represent granted permissions or an API contract.
 export const escalationDraftSchema = z.object({
-  team: z.enum(DEMO_TEAMS),
+  team: z.string().trim().min(1, 'Choose a team.'),
   priority: z.enum(['Critical', 'High', 'Medium', 'Low']),
 });
 export const resolutionDraftSchema = z.object({

@@ -8,6 +8,7 @@ import { CUSTOMER_ROUTES } from '@/constants/routes';
 import { StatusBadge } from '@/components/ui/StatusBadge/StatusBadge';
 import { TicketElapsed } from '@/features/support/components/TicketElapsed/TicketElapsed';
 import { TicketAttachments } from '@/features/support/components/TicketAttachments/TicketAttachments';
+import { formatSupportDate } from '@/features/support/helpers/supportHelpers';
 import type { TicketDetail } from '@/features/support/types/ticketDetailTypes';
 export function TicketSummary({ detail }: { detail: TicketDetail }) {
   const { ticket } = detail;
@@ -15,9 +16,13 @@ export function TicketSummary({ detail }: { detail: TicketDetail }) {
     'mb-4 flex items-center gap-2 rounded-lg bg-neutral-50 p-3 text-xs text-neutral-500';
   return (
     <aside aria-label="Ticket summary" className="min-w-0 space-y-4">
-      <div className="flex flex-wrap justify-between gap-2 rounded-lg bg-white p-3 font-mono text-xs text-[#788096]">
-        <span>{ticket.updated}</span>
-        <span>{detail.openedTime}</span>
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-white p-3 text-xs text-[#788096]">
+        <span className="font-mono break-all">
+          #{ticket.ticketCode || ticket.id}
+        </span>
+        <time dateTime={ticket.updated} title={ticket.updated}>
+          Last updated {formatSupportDate(ticket.updated)}
+        </time>
       </div>
       <section className="rounded-2xl bg-white p-4">
         <h2 className={heading}>
@@ -30,9 +35,14 @@ export function TicketSummary({ detail }: { detail: TicketDetail }) {
               {ticket.subject}
             </h3>
             <span className="max-w-full text-[10px] break-all text-neutral-500">
-              #{ticket.id}
+              #{ticket.ticketCode || ticket.id}
             </span>
           </div>
+          {detail.description && (
+            <p className="border-t border-neutral-100 pt-3 text-xs leading-5 text-[#788096]">
+              {detail.description}
+            </p>
+          )}
           <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
             {detail.customerId ? (
               <Link
@@ -69,9 +79,7 @@ export function TicketSummary({ detail }: { detail: TicketDetail }) {
           Resolution Details
         </h2>
         <div className="space-y-3 border-t border-neutral-100 pt-4">
-          <p className="text-xs text-[#788096]">
-            Time in Queue · Static sample
-          </p>
+          <p className="text-xs text-[#788096]">Time in queue</p>
           <div className="flex flex-wrap items-center justify-between gap-2">
             <TicketElapsed seconds={ticket.elapsedSeconds} />
             <StatusBadge
@@ -96,6 +104,21 @@ export function TicketSummary({ detail }: { detail: TicketDetail }) {
               <dd>{ticket.assignee}</dd>
             </div>
           </dl>
+          {detail.resolution && (
+            <div className="space-y-2 border-t border-neutral-100 pt-3">
+              <p className="text-xs font-medium text-slate-800">Resolution</p>
+              <p className="text-xs leading-5 text-[#788096]">
+                {detail.resolution}
+              </p>
+              {detail.resolvedAt && (
+                <p className="text-[10px] text-[#788096]">
+                  Resolved
+                  {detail.resolvedBy ? ` by ${detail.resolvedBy}` : ''} on{' '}
+                  {formatSupportDate(detail.resolvedAt)}
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </section>
       <TicketAttachments items={detail.attachments} />

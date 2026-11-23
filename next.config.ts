@@ -4,6 +4,7 @@ import type { NextConfig } from 'next';
 export default function configure(): NextConfig {
   return {
     poweredByHeader: false,
+    experimental: { agentUpgrade: 'security' },
     devIndicators:
       process.env.PLAYWRIGHT_PREVIEW === 'true' ? false : undefined,
     // Keep the browser-test dev server separate from a running development session.

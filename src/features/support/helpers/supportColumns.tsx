@@ -5,6 +5,7 @@ import type { DataTableColumn } from '@/components/organisms/DataTable/DataTable
 import { RecordActions } from '@/components/molecules/RecordActions/RecordActions';
 import { RecordStatus } from '@/components/molecules/RecordStatus/RecordStatus';
 import { TicketElapsed } from '@/features/support/components/TicketElapsed/TicketElapsed';
+import { formatSupportDate } from '@/features/support/helpers/supportHelpers';
 import type {
   SupportTicket,
   TicketPriority,
@@ -20,15 +21,19 @@ export const supportColumns: readonly DataTableColumn<SupportTicket>[] = [
     id: 'updated',
     header: 'Last Updated',
     className: 'w-24',
-    cell: (row) => row.updated,
+    cell: (row) => (
+      <time dateTime={row.updated} title={row.updated}>
+        {formatSupportDate(row.updated)}
+      </time>
+    ),
   },
   {
     id: 'id',
     header: 'Ticket ID',
     className: 'w-26',
     cell: (row) => (
-      <span className="block truncate" title={row.id}>
-        #{row.id}
+      <span className="block truncate" title={row.ticketCode || row.id}>
+        #{row.ticketCode || row.id}
       </span>
     ),
   },

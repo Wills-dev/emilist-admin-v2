@@ -1,6 +1,6 @@
 'use client';
 import { useForm } from 'react-hook-form';
-import { DEMO_TEAMS } from '@/features/support/fixtures/ticketDetailFixtures';
+import { toast } from 'sonner';
 import {
   escalationDraftSchema,
   resolutionDraftSchema,
@@ -12,16 +12,23 @@ import type {
 export function TicketActionForms({
   action,
   ticket,
+  teams,
+  onAssign,
+  onResolve,
 }: {
   action: 'escalate' | 'resolve';
   ticket: SupportTicket;
+  teams: readonly string[];
+  onAssign?: (body: unknown) => Promise<unknown>;
+  onResolve?: (body: unknown) => Promise<unknown>;
 }) {
   const {
     register,
+    handleSubmit,
     formState: { errors },
   } = useForm<{ team: string; priority: TicketPriority; resolution: string }>({
     defaultValues: {
-      team: DEMO_TEAMS[0],
+      team: teams[0] || '',
       priority: ticket.priority,
       resolution: '',
     },
@@ -32,7 +39,27 @@ export function TicketActionForms({
   return (
     <form
       id="ticket-action-form"
-      onSubmit={(event) => event.preventDefault()}
+      onSubmit={handleSubmit(async (values) => {
+        try {
+          if (action === 'resolve') {
+            await onResolve?.({ resolution: values.resolution });
+            toast.success('Ticket resolved.');
+          } else {
+            await onAssign?.({
+              assignedTeam: values.team,
+              priority: values.priority.toLowerCase(),
+              escalated: true,
+            });
+            toast.success('Ticket assignment updated.');
+          }
+        } catch {
+          toast.error(
+            action === 'resolve'
+              ? 'Unable to resolve this ticket. Please try again.'
+              : 'Unable to update the ticket assignment. Please try again.',
+          );
+        }
+      })}
       className="border-t border-neutral-100 pt-6"
     >
       {action === 'escalate' ? (
@@ -43,13 +70,15 @@ export function TicketActionForms({
               {...register('team', {
                 validate: (value) =>
                   escalationDraftSchema.shape.team.safeParse(value).success ||
-                  'Choose a sample team.',
+                  'Choose a team.',
               })}
               className={control}
             >
-              {DEMO_TEAMS.map((team) => (
-                <option key={team}>{team}</option>
-              ))}
+              {teams.length ? (
+                teams.map((team) => <option key={team}>{team}</option>)
+              ) : (
+                <option value="">No teams available</option>
+              )}
             </select>
           </label>
           <label className="text-sm text-neutral-600">

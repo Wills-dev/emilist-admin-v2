@@ -2,6 +2,7 @@
 import { EmptyState } from '@/components/molecules/EmptyState/EmptyState';
 import { StatusBadge } from '@/components/ui/StatusBadge/StatusBadge';
 import { TicketReplyDraft } from '@/features/support/components/TicketReplyDraft/TicketReplyDraft';
+import { formatSupportDate } from '@/features/support/helpers/supportHelpers';
 import type {
   TicketDetail,
   TicketMessage,
@@ -9,9 +10,13 @@ import type {
 export function TicketConversation({
   detail,
   messages,
+  onReply,
+  replyPending,
 }: {
   detail: TicketDetail;
   messages: readonly TicketMessage[];
+  onReply?: (body: FormData) => Promise<unknown>;
+  replyPending?: boolean;
 }) {
   const { ticket } = detail;
   return (
@@ -21,12 +26,14 @@ export function TicketConversation({
     >
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 p-5">
         <div className="min-w-0">
-          <p className="text-xs break-all text-[#788096]">{ticket.id}</p>
+          <p className="text-xs break-all text-[#788096]">
+            #{ticket.ticketCode || ticket.id}
+          </p>
           <h2 className="mt-2 text-lg font-semibold text-slate-900">
             {ticket.subject}
           </h2>
           <p className="mt-2 text-xs text-[#788096]">
-            Last Updated: {ticket.updated} · Synthetic conversation
+            Last updated: {formatSupportDate(ticket.updated)}
           </p>
         </div>
         <StatusBadge
@@ -44,7 +51,7 @@ export function TicketConversation({
       {messages.length ? (
         <ol
           aria-label="Conversation messages"
-          className="flex flex-1 flex-col justify-between gap-7 p-4 sm:p-5"
+          className="flex flex-1 flex-col gap-7 overflow-y-auto p-4 sm:p-5"
         >
           {messages.map((message) => (
             <li
@@ -59,7 +66,7 @@ export function TicketConversation({
               </span>
               <div className="max-w-[90%] min-w-0 space-y-2 rounded-2xl bg-[#f8f9fa] p-4 sm:max-w-[85%]">
                 <p className="text-[10px] font-semibold text-[#788096]">
-                  {message.author} · {message.time}
+                  {message.author} · {formatSupportDate(message.time)}
                 </p>
                 <p className="text-xs leading-5 break-words whitespace-pre-wrap text-slate-900">
                   {message.text}
@@ -72,13 +79,15 @@ export function TicketConversation({
         <div className="flex-1 p-5">
           <EmptyState
             title="No messages match"
-            description="No sample conversation messages match the selected search or sender."
+            description="There are no messages on this ticket yet."
           />
         </div>
       )}
       <TicketReplyDraft
         key={ticket.id}
         resolved={ticket.status === 'Resolved'}
+        onReply={onReply}
+        pending={replyPending}
       />
     </section>
   );

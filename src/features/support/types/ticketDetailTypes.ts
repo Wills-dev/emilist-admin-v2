@@ -1,5 +1,4 @@
 import type { SupportTicket } from './supportTypes';
-// Synthetic presentation records only, not live messages or backend contracts.
 export interface TicketMessage {
   id: string;
   sender: 'Customer' | 'Staff';
@@ -10,10 +9,14 @@ export interface TicketMessage {
 }
 export interface TicketDetail {
   ticket: SupportTicket;
+  description: string;
   customerId?: string;
   openedTime: string;
   team: string;
   notes: string;
+  resolution?: string;
+  resolvedAt?: string;
+  resolvedBy?: string;
   attachments: readonly string[];
   messages: readonly TicketMessage[];
 }
