@@ -4,3 +4,17 @@ export function formatElapsedTime(seconds: number): string {
     .map((part) => String(part).padStart(2, '0'))
     .join(':');
 }
+
+export function formatSupportDate(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value || '—';
+  return new Intl.DateTimeFormat('en-NG', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+    timeZone: 'Africa/Lagos',
+  }).format(date);
+}

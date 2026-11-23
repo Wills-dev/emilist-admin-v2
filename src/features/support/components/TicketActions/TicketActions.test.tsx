@@ -6,7 +6,10 @@ import { getTicketDetail } from '@/features/support/fixtures/ticketDetailFixture
 it('keeps resolution and escalation drafts unavailable and restores trigger focus', async () => {
   const user = userEvent.setup();
   render(
-    <TicketActions ticket={getTicketDetail('demo-record-74-001')!.ticket} />,
+    <TicketActions
+      ticket={getTicketDetail('demo-record-74-001')!.ticket}
+      teams={['Operations']}
+    />,
   );
   const resolve = screen.getByRole('button', { name: 'Resolve Ticket' });
   await user.click(resolve);

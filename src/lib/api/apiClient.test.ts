@@ -123,3 +123,16 @@ it('allows only GET current-user requests through the same-origin session handle
   ).rejects.toMatchObject({ code: 'configuration' });
   expect(adapter).not.toHaveBeenCalled();
 });
+
+it('allows support list requests with query parameters', async () => {
+  const { apiClient } = await import('./apiClient');
+  const adapter = vi
+    .fn()
+    .mockResolvedValue({ data: {}, status: 200, headers: {}, config: {} });
+
+  await apiClient.get('/api/admin/support-requests?page=1&limit=10', {
+    adapter,
+  });
+
+  expect(adapter).toHaveBeenCalledOnce();
+});

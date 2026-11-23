@@ -10,6 +10,8 @@ export const apiClient = axios.create({
   withCredentials: true,
 });
 apiClient.interceptors.request.use((config) => {
+  if (typeof FormData !== 'undefined' && config.data instanceof FormData)
+    config.headers.setContentType(false);
   const loginRequest =
     !config.baseURL &&
     Object.values(ADMIN_AUTH_ROUTES).some((path) => path === config.url) &&
@@ -19,7 +21,12 @@ apiClient.interceptors.request.use((config) => {
         [ADMIN_AUTH_ROUTES.invitation, ADMIN_AUTH_ROUTES.currentUser].some(
           (path) => path === config.url,
         )));
-  if (loginRequest) return config;
+  const supportRequest =
+    !config.baseURL &&
+    (config.url === '/api/admin/support-requests' ||
+      config.url?.startsWith('/api/admin/support-requests/') ||
+      config.url?.startsWith('/api/admin/support-requests?'));
+  if (loginRequest || supportRequest) return config;
 
   throw new ApiError(
     'Administrative network requests are disabled in this fixture preview.',

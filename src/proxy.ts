@@ -1,51 +1,41 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { ROUTES, JOB_TAB_PATHS } from '@/constants/routes';
-import { ADMIN_AUTH_ROUTES } from '@/config/adminAuth';
+import { ROUTES } from '@/constants/routes';
+import { SESSION_COOKIE } from '@/features/auth/server/adminSessionResponse';
 
 export function proxy(request: NextRequest) {
-  // Only explicit authentication handlers accept POSTs; fixture mutations stay blocked.
   const path = request.nextUrl.pathname;
-  const jobSegments = path.startsWith(`${ROUTES.jobs}/`)
-    ? path.slice(ROUTES.jobs.length + 1).split('/')
-    : [];
-  const jobPage =
-    !!jobSegments[0] &&
-    (jobSegments.length === 1 ||
-      (jobSegments.length === 2 &&
-        Object.values(JOB_TAB_PATHS).some(
-          (tab) => tab && tab === jobSegments[1],
-        )));
-  const page =
-    jobPage ||
-    /^\/support\/[^/]+$/.test(path) ||
-    /^\/payments\/[^/]+$/.test(path) ||
-    /^\/materials\/(?:orders|listings)\/[^/]+$/.test(path) ||
-    Object.values(ROUTES).some((route) => path === route) ||
-    /^\/customers\/[^/]+(?:\/(?:services|jobs|listed-items|orders|sales|transactions|subscriptions))?$/.test(
-      path,
-    );
-  const asset =
-    path.startsWith('/_next/') ||
-    path.startsWith('/images/') ||
-    path === '/favicon.ico';
-  const authPost =
-    request.method === 'POST' &&
-    path !== ADMIN_AUTH_ROUTES.currentUser &&
-    Object.values(ADMIN_AUTH_ROUTES).some((route) => route === path);
-  const invitationGet =
+  const publicPages: string[] = [
+    ROUTES.login,
+    ROUTES.loginVerify,
+    ROUTES.acceptInvite,
+    ROUTES.invitePassword,
+    ROUTES.inviteAuthenticator,
+    ROUTES.forgotPassword,
+    ROUTES.resetLinkStatus,
+    ROUTES.resetVerify,
+    ROUTES.resetPassword,
+  ];
+  const pageRequest =
     request.method === 'GET' &&
-    [ADMIN_AUTH_ROUTES.invitation, ADMIN_AUTH_ROUTES.currentUser].some(
-      (route) => route === path,
-    );
-  const response =
-    !authPost &&
-    !invitationGet &&
-    (!['GET', 'HEAD'].includes(request.method) || (!page && !asset))
-      ? NextResponse.json(
-          { error: 'Unavailable in Demo Mode.' },
-          { status: 403 },
-        )
-      : NextResponse.next();
+    !path.startsWith('/api/') &&
+    !path.startsWith('/_next/') &&
+    !path.startsWith('/images/') &&
+    path !== '/favicon.ico';
+  let response: NextResponse;
+  if (
+    !pageRequest ||
+    publicPages.includes(path) ||
+    path.startsWith('/api/admin-auth/')
+  ) {
+    response = NextResponse.next();
+  } else if (!request.cookies.get(SESSION_COOKIE)?.value) {
+    const login = request.nextUrl.clone();
+    login.pathname = ROUTES.login;
+    login.search = `?returnTo=${encodeURIComponent(path)}`;
+    response = NextResponse.redirect(login);
+  } else {
+    response = NextResponse.next();
+  }
   if (process.env.NODE_ENV === 'production') {
     response.headers.set(
       'Content-Security-Policy',

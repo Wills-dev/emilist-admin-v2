@@ -7,7 +7,19 @@ import { ROUTES } from '@/constants/routes';
 import { StatusBadge } from '@/components/ui/StatusBadge/StatusBadge';
 import { TicketActionForms } from '@/features/support/components/TicketActionForms/TicketActionForms';
 import type { SupportTicket } from '@/features/support/types/supportTypes';
-export function TicketActions({ ticket }: { ticket: SupportTicket }) {
+export function TicketActions({
+  ticket,
+  teams,
+  onAssign,
+  onResolve,
+  pending,
+}: {
+  ticket: SupportTicket;
+  teams: readonly string[];
+  onAssign?: (body: unknown) => Promise<unknown>;
+  onResolve?: (body: unknown) => Promise<unknown>;
+  pending?: boolean;
+}) {
   const [action, setAction] = useState<'escalate' | 'resolve'>('escalate');
   const [open, setOpen] = useState(false);
   const trigger = useRef<HTMLButtonElement | null>(null);
@@ -28,11 +40,16 @@ export function TicketActions({ ticket }: { ticket: SupportTicket }) {
             <button
               key={kind}
               type="button"
-              disabled={kind === 'resolve' && ticket.status === 'Resolved'}
+              disabled={
+                (kind === 'resolve' && ticket.status === 'Resolved') ||
+                (kind === 'escalate' && teams.length === 0)
+              }
               title={
                 kind === 'resolve' && ticket.status === 'Resolved'
-                  ? 'This synthetic ticket is already resolved'
-                  : undefined
+                  ? 'This ticket is already resolved'
+                  : kind === 'escalate' && teams.length === 0
+                    ? 'Loading assignment teams'
+                    : undefined
               }
               onClick={(event) => {
                 trigger.current = event.currentTarget;
@@ -74,7 +91,7 @@ export function TicketActions({ ticket }: { ticket: SupportTicket }) {
           {action === 'escalate' && (
             <div className="mb-5 flex flex-wrap items-center gap-2 text-xs text-neutral-500">
               <span className="min-w-0 rounded-lg bg-neutral-50 p-3 break-all">
-                #{ticket.id}
+                #{ticket.ticketCode || ticket.id}
               </span>
               <span className="rounded-lg bg-neutral-50 p-3">
                 {ticket.subject}
@@ -97,10 +114,17 @@ export function TicketActions({ ticket }: { ticket: SupportTicket }) {
             }
           >
             {action === 'escalate'
-              ? 'Choose a sample team and priority for this ticket draft. No assignment will be saved.'
+              ? 'Choose a team and priority for this ticket.'
               : 'Has the user’s issue been resolved successfully?'}
           </Dialog.Description>
-          <TicketActionForms action={action} ticket={ticket} />
+          <TicketActionForms
+            key={teams.join('|')}
+            action={action}
+            ticket={ticket}
+            teams={teams}
+            onAssign={onAssign}
+            onResolve={onResolve}
+          />
           <div className="mt-6 flex gap-3 border-t border-neutral-100 pt-6">
             {action === 'resolve' && (
               <Dialog.Close asChild>
@@ -115,19 +139,21 @@ export function TicketActions({ ticket }: { ticket: SupportTicket }) {
             <button
               type="submit"
               form="ticket-action-form"
-              disabled
-              title="Backend integration required; no ticket changes will be saved"
+              disabled={
+                pending || (action === 'resolve' ? !onResolve : !onAssign)
+              }
+              title={pending ? 'Saving ticket changes' : undefined}
               className="flex-1 rounded-lg bg-[#20c46b] px-4 py-3 text-sm text-white disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {action === 'escalate' ? 'Submit' : 'Resolve Ticket'}
+              {pending
+                ? action === 'escalate'
+                  ? 'Saving…'
+                  : 'Resolving…'
+                : action === 'escalate'
+                  ? 'Submit'
+                  : 'Resolve Ticket'}
             </button>
           </div>
-          <p
-            role="note"
-            className="mt-3 text-center text-[10px] text-slate-500"
-          >
-            Preview only. Ticket changes require backend integration.
-          </p>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
